@@ -33,10 +33,14 @@
             <button v-on:click="signupUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Sign Up</button>
 
             <div class="failed" v-show='failedName'>
-                <p>Username '{{failedName}}' doesn't exists or is logged in!</p>
+                <p>Wrong password, Username '{{failedName}}' doesn't exists, or is logged in!</p>
             </div>
         </div>
+
         <!-- end user join -->
+        <div class="col s12" v-show="loggedIn">
+            <p>You are logged in</p>
+        </div>
     </div>
     </div>
 

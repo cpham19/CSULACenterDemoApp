@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Demo App</title>
+
+    <link rel="shortcut icon" href="img/favicon-chat.png" />
+    <!-- Import Google Fonts -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Rajdhani:400,700" rel="stylesheet">
+    <!-- Import materialize.css -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
+    <!-- Import custom css -->
+    <link rel="stylesheet" href="css/style.css">
+
+    <style>
+        [v-cloak] {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="demo-app">
+        <!-- start user join -->
+        <div class="col s12" v-show="!loggedIn">
+            <img src="img/csula-logo.png" class="center" width="300px">
+            <p>Welcome to CSULA Center</p>
+            <input v-model="userName" placeholder="name" type="text" class="u-full-width">
+            <input v-model="password" placeholder="password" type="password" class="u-full-width">
+            <button v-on:click="joinUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Login</button>
+            <button v-on:click="signupUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Sign Up</button>
+
+            <div class="failed" v-show='failedName'>
+                <p>Username '{{failedName}}' doesn't exists or is logged in!</p>
+            </div>
+        </div>
+        <!-- end user join -->
+    </div>
+    </div>
+
+    <script type="text/javascript" src="https://unpkg.com/vue@2.5.15/dist/vue.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/socket.io-client@2.1.0/dist/socket.io.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+</body>
+
+</html>

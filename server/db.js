@@ -16,10 +16,20 @@ const UserSchema = new Mongoose.Schema({
     socketId: String,
     password: String,
     admin: Boolean,
-    score: Number,
+}, { strict: false })
+
+// Schema for Courses
+const CourseSchema = new Mongoose.Schema({
+    department: String,
+    name: String,
+    number: Number,
+    section: Number,
+    units: Number
 }, { strict: false })
 
 const User = Mongoose.model('users', UserSchema)
+
+const Course = Mongoose.model('courses', CourseSchema)
 
 // Array of users
 const activeUsers = () => User.find({ socketId: { $ne: null } }, { password: 0 })
@@ -53,8 +63,8 @@ const loginUser = (userName, password, socketId) => {
         // active == have socketId
         .then(({ _id }) => User.findOneAndUpdate({ _id }, { $set: { socketId } }))
         // return name and avatar
-        .then(({ name, avatar, admin, score}) => {
-            return { name, avatar, admin, score}
+        .then(({ name, avatar, admin}) => {
+            return { name, avatar, admin}
         })
 }
 
@@ -75,14 +85,13 @@ const createUser = (userName, password, administrator, socketId) => {
                 password: generateHash(password),
                 admin : administrator,
                 avatar: `https://robohash.org/${userName}`,
-                score: 0
             }
         })
         // Create user from user object 
         .then(user => User.create(user))
         // Return avatar and name
-        .then(({ name, avatar, admin, score}) => {
-            return { name, avatar, admin, score}
+        .then(({ name, avatar, admin}) => {
+            return { name, avatar, admin}
         })
 }
 

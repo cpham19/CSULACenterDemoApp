@@ -13,6 +13,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0-beta/css/materialize.min.css">
     <!-- Import custom css -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u"
+        crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
+        crossorigin="anonymous">
 
     <style>
         [v-cloak] {
@@ -23,10 +29,25 @@
 
 <body>
     <div id="demo-app">
-        <!-- start user join -->
-        <div class="col s12" v-show="!loggedIn">
+
+        <!-- header -->
+        <div class="header">
+            <div class="header-left" v-show='loggedIn'>
+                <img src="img/csula-logo.png" class="logo" width="200px" height="140px">
+            </div>
+            <div class="header-right" v-show="loggedIn">
+                <button v-show="state !== 'Home'" v-on:click="changeState('Home')" class="btn btn-primary" type="submit">Home</button>
+                <button v-show="state === 'Home'" v-on:click="changeState('Home')" class="btn btn-danger" type="submit">Home</button>
+                <button v-show="state !== 'Courses'" v-on:click="changeState('Courses')" class="btn btn-primary" type="submit">Courses</button>
+                <button v-show="state === 'Courses'" v-on:click="changeState('Courses')" class="btn btn-danger" type="submit">Courses</button>
+                <button v-show="state !== 'Forums'" v-on:click="changeState('Forums')" class="btn btn-primary" type="submit">Forums</button>
+                <button v-show="state === 'Forums'" v-on:click="changeState('Forums')" class="btn btn-danger" type="submit">Forums</button>
+            </div>
+        </div>
+
+        <!-- login screen -->
+        <div v-show="!loggedIn">
             <img src="img/csula-logo.png" class="center" width="300px">
-            <p>Welcome to CSULA Center</p>
             <input v-model="userName" placeholder="name" type="text" class="u-full-width">
             <input v-model="password" placeholder="password" type="password" class="u-full-width">
             <button v-on:click="joinUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Login</button>
@@ -37,11 +58,72 @@
             </div>
         </div>
 
-        <!-- end user join -->
-        <div class="col s12" v-show="loggedIn">
-            <p>You are logged in</p>
+        <!-- Course list -->
+        <div class="row">
+            <div class="col s2" v-show="loggedIn && state === 'Home'">
+                <div class="course-list">
+                    <h6 align="center">Current Courses ({{courses.length}})</h6>
+                    <ul v-for="course in courses">
+                        <li>
+
+                        </li>
+                        <hr>
+                    </ul>
+                </div>
+            </div>
+
+            <div class='col s10' v-show="loggedIn && state === 'Home'">
+                <p>Home Page</p>
+            </div>
+        </div>
+
+        <div class="row" v-show="loggedIn">
+            <div class="column" v-show="state === 'Courses'">
+                <button class="block" v-on:click="changeCourseState('search')" type="submit">Search Courses</button>
+            </div>
+            <div class="column" v-show="state === 'Courses'">
+                <button class="block" v-on:click="changeCourseState('add')" type="submit">Add Course</button>
+            </div>
+        </div>
+
+        <div v-show="loggedIn && state === 'Courses' && search">
+            <select class="browser-default" v-model="courseDept">
+                <option disabled value="">course dept</option>
+                <option>CS</option>
+                <option>ME</option>
+                <option>BIOL</option>
+                <option>PHYS</option>
+                <option>CHEM</option>
+                <option>COMM</option>
+                <option>CE</option>
+            </select>
+            <input v-model="courseNumber" placeholder="course number" type="text">
+            <button v-on:click="searchCourse" class="btn-small waves-effect waves-light" type="submit">Search</button>
+        </div>
+
+        <div v-show="loggedIn && state === 'Courses' && add">
+            <select class="browser-default" v-model="courseDept">
+                <option disabled value="">course dept</option>
+                <option>CS</option>
+                <option>ME</option>
+                <option>BIOL</option>
+                <option>PHYS</option>
+                <option>CHEM</option>
+                <option>COMM</option>
+                <option>CE</option>
+            </select>
+            <input v-model="courseName" placeholder="course name" type="text">
+            <input v-model="courseNumber" placeholder="course number" type="text">
+            <input v-model="courseSection" placeholder="course section" type="text">
+            <input v-model="courseUnit" placeholder="course unit" type="text">
+            <button v-on:click="addCourse" class="btn-small waves-effect waves-light" type="submit">Add</button>
+        </div>
+
+        <div v-show="loggedIn && state === 'Forums'">
+            <p>Forums Page</p>
         </div>
     </div>
+
     </div>
 
     <script type="text/javascript" src="https://unpkg.com/vue@2.5.15/dist/vue.min.js"></script>

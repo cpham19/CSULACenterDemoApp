@@ -22,16 +22,26 @@ const app = new Vue({
         userName: '',
         password: '',
         failedName: '',
+        failed: '',
+        admin: false,
         me: {},
         users: [],
+        courses: [],
+        state: 'Home',
+        courseDept: '',
+        courseName: '',
+        courseNumber: '',
+        courseSection: '',
+        courseUnit: '',
+        search: true,
+        add: false,
     },
     created: function () {
         // Unload resources after closing tab or browser
         document.addEventListener('beforeunload', this.handler)
-    }, methods: {
-        handler: function handler(event) { }
     },
     methods: {
+        handler: function handler(event) { },
         joinUser: function () {
             // Reject if user doesn't put name or password
             if (!this.userName || !this.password) {
@@ -48,6 +58,26 @@ const app = new Vue({
 
             socket.emit('create-user', this.userName, this.password, this.admin)
         },
+        changeState: function (state) {
+            this.state = state
+            console.log(this.state)
+        },
+        changeCourseState: function (state) {
+            if (state === 'search') {
+                this.search = true
+                this.add = false
+            }
+            else if (state === 'add') {
+                this.search = false
+                this.add = true
+            }
+        },
+        addCourse: function () {
+      
+        },
+        searchCourse: function () {
+      
+        },
     },
     components: {
     }
@@ -57,9 +87,6 @@ const app = new Vue({
 
 // Refresh userlist
 socket.on('refresh-users', users => {
-    users.sort((a,b) => {
-        return b.score - a.score
-    })
     app.users = users
 })
 
@@ -78,6 +105,7 @@ socket.on('successful-join', user => {
 
 // Failed to join because username exists
 socket.on('failed-join', obj => {
-    if (obj.name === app.userName)
+    if (obj.name === app.userName) {
         app.failedName = obj.name
+    }
 })

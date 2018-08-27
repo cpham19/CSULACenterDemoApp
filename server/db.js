@@ -16,15 +16,16 @@ const UserSchema = new Mongoose.Schema({
     socketId: String,
     password: String,
     admin: Boolean,
+    courses: Array,
 }, { strict: false })
 
 // Schema for Courses
 const CourseSchema = new Mongoose.Schema({
-    department: String,
+    dept: String,
     name: String,
     number: Number,
     section: Number,
-    units: Number
+    unit: Number
 }, { strict: false })
 
 const User = Mongoose.model('users', UserSchema)
@@ -34,8 +35,13 @@ const Course = Mongoose.model('courses', CourseSchema)
 // Array of users
 const activeUsers = () => User.find({ socketId: { $ne: null } }, { password: 0 })
 
+// Array of courses
+const listOfCourses = () => Course.find({ dept : { $ne: null } })
+
 // Used for validating user for login using regular expression ('Bob' = 'bob')
 const findUserByName = userName => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
+
+const findCourseByDeptAndNumAndSection = (courseDept, courseNum, courseSection) => Course.findOne({dept: courseDept, number: courseNum, section: courseSection})
 
 // Validating user for logging in
 const loginUser = (userName, password, socketId) => {
@@ -85,13 +91,14 @@ const createUser = (userName, password, administrator, socketId) => {
                 password: generateHash(password),
                 admin : administrator,
                 avatar: `https://robohash.org/${userName}`,
+                courses: []
             }
         })
         // Create user from user object 
         .then(user => User.create(user))
         // Return avatar and name
-        .then(({ name, avatar, admin}) => {
-            return { name, avatar, admin}
+        .then(({ name, avatar, admin, courses}) => {
+            return { name, avatar, admin, courses}
         })
 }
 
@@ -100,9 +107,38 @@ const logoutUser = socketId => {
     return User.findOneAndUpdate({ socketId }, { $set: { socketId: null } })
 }
 
+// Add course
+const addCourse = (courseDept, courseName, courseNumber, courseSection, courseUnit) => {
+    // Return a user object if username is in db
+    return findCourseByDeptAndNumAndSection(courseDept, courseNumber, courseSection)
+        .then(found => {
+            // Check if username is taken already
+            if (found) {
+                throw new Error('Course Section already exists')
+            }
+
+            // Return an object if username doesnt exist
+            return {
+                dept: courseDept,
+                name: courseName,
+                number: courseNumber,
+                section : courseSection,
+                unit: courseUnit,
+            }
+        })
+        // Create user from user object 
+        .then(course => Course.create(course))
+        // Return avatar and name
+        .then(({dept, name, number, section, unit}) => {
+            return {dept, name, number, section, unit}
+        })
+}
+
 module.exports = {
     activeUsers,
     createUser,
     loginUser,
-    logoutUser
+    logoutUser,
+    addCourse,
+    listOfCourses
 }

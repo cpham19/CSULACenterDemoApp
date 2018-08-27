@@ -6,7 +6,8 @@ module.exports = (server, db) => {
     io.on('connection', socket => {
         // when a connection is made - load in the content already present on the server
         db.activeUsers().then(users => socket.emit('refresh-users', users))
-        
+        db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+
         // demo code only for sockets + db
         // in production login/user creation should happen with a POST to https endpoint
         // upon success - revert to websockets
@@ -25,7 +26,7 @@ module.exports = (server, db) => {
                 // success
                 .then(created => io.emit('successful-join', created))
                 // error
-                .catch(err => io.emit('failed-join', {name: userName }))
+                .catch(err => io.emit('failed-join', { name: userName }))
         })
 
         socket.on('disconnect', () => {
@@ -34,6 +35,19 @@ module.exports = (server, db) => {
                 // update the actives
                 .then(() => db.activeUsers())
                 .then(users => io.emit('refresh-users', users))
+        })
+
+        socket.on('add-course', (courseDept, courseName, courseNumber, courseSection, courseUnit) => {
+            // add course
+            db.addCourse(courseDept, courseName, courseNumber, courseSection, courseUnit)
+                // success
+                .then(added =>
+                    io.emit('successful-add-course', added)
+                )
+                // error
+                .catch(err => io.emit('failed-add-course', { dept: courseDept }))
+
+            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
     })
 }

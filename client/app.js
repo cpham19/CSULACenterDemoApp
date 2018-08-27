@@ -35,6 +35,7 @@ const app = new Vue({
         courseUnit: '',
         search: true,
         add: false,
+        searchedCourses: []
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -60,23 +61,45 @@ const app = new Vue({
         },
         changeState: function (state) {
             this.state = state
-            console.log(this.state)
         },
         changeCourseState: function (state) {
             if (state === 'search') {
+                this.courseDept = ''
+                this.courseNumber = ''
                 this.search = true
                 this.add = false
             }
             else if (state === 'add') {
+                this.courseDept = ''
+                this.courseNumber = ''
                 this.search = false
                 this.add = true
             }
         },
         addCourse: function () {
-      
+            socket.emit('add-course', this.courseDept, this.courseName, this.courseNumber, this.courseSection, this.courseUnit)
         },
         searchCourse: function () {
-      
+            // If courseDept is empty, do nothing
+            // If both are empty, do nothing
+            if (!this.courseDept || (!this.courseDept && !this.courseNumber)) {
+                return
+            }
+
+            // Clear after every search
+            this.searchedCourses = []
+
+            this.courses.forEach((course) => {
+                if (course.dept === this.courseDept && !this.courseNumber) {
+                    this.searchedCourses.push(course)
+                }
+                else if (course.dept === this.courseDept && course.number == this.courseNumber) {
+                    this.searchedCourses.push(course)
+                }
+            })
+
+        },
+        enrollCourse: function () {
         },
     },
     components: {
@@ -90,6 +113,11 @@ socket.on('refresh-users', users => {
     app.users = users
 })
 
+// Refresh courses
+socket.on('refresh-courses', courses => {
+    app.courses = courses
+})
+
 // Successfully join (change screen)
 socket.on('successful-join', user => {
     if (app.userName === user.name) {
@@ -97,9 +125,8 @@ socket.on('successful-join', user => {
         app.loggedIn = true
         app.failed = ''
         app.password = ''
-        app.admin = user.admin
     }
-        
+
     app.users.push(user)
 })
 
@@ -108,4 +135,14 @@ socket.on('failed-join', obj => {
     if (obj.name === app.userName) {
         app.failedName = obj.name
     }
+})
+
+// Added course
+socket.on('successful-add-course', courseObj => {
+    app.courseDept = ''
+    app.courseName = ''
+    app.courseNumber = ''
+    app.courseSection = ''
+    app.courseUnit = ''
+    app.courses.push(courseObj)
 })

@@ -51,7 +51,8 @@
             <input v-model="userName" placeholder="name" type="text" class="u-full-width">
             <input v-model="password" placeholder="password" type="password" class="u-full-width">
             <button v-on:click="joinUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Login</button>
-            <button v-on:click="signupUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Sign Up</button>
+            <button v-on:click="signupUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Sign
+                Up</button>
 
             <div class="failed" v-show='failedName'>
                 <p>Wrong password, Username '{{failedName}}' doesn't exists, or is logged in!</p>
@@ -62,10 +63,12 @@
         <div class="row">
             <div class="col s2" v-show="loggedIn && state === 'Home'">
                 <div class="course-list">
-                    <h6 align="center">Current Courses ({{courses.length}})</h6>
-                    <ul v-for="course in courses">
+                    <h4 align="center">Current Courses</h4>
+                    <hr/>
+                    <ul v-for="course in me.courses">
                         <li>
-
+                            <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
+                            <p>{{course.name}}</p>
                         </li>
                         <hr>
                     </ul>
@@ -77,6 +80,7 @@
             </div>
         </div>
 
+        <!-- Toggle between Searching Courses and Add Courses screen -->
         <div class="row" v-show="loggedIn">
             <div class="column" v-show="state === 'Courses'">
                 <button class="block" v-on:click="changeCourseState('search')" type="submit">Search Courses</button>
@@ -86,6 +90,7 @@
             </div>
         </div>
 
+        <!-- For Searching Courses -->
         <div v-show="loggedIn && state === 'Courses' && search">
             <select class="browser-default" v-model="courseDept">
                 <option disabled value="">course dept</option>
@@ -98,9 +103,10 @@
                 <option>CE</option>
             </select>
             <input v-model="courseNumber" placeholder="course number" type="text">
-            <button v-on:click="searchCourse" class="btn-small waves-effect waves-light" type="submit">Search</button>
+            <button v-on:click="searchCourse()" class="btn-small waves-effect waves-light" type="submit">Search</button>
         </div>
 
+        <!-- For Adding Courses -->
         <div v-show="loggedIn && state === 'Courses' && add">
             <select class="browser-default" v-model="courseDept">
                 <option disabled value="">course dept</option>
@@ -117,6 +123,18 @@
             <input v-model="courseSection" placeholder="course section" type="text">
             <input v-model="courseUnit" placeholder="course unit" type="text">
             <button v-on:click="addCourse" class="btn-small waves-effect waves-light" type="submit">Add</button>
+        </div>
+
+        <!-- Search Results of Courses -->
+        <div v-show="loggedIn && state === 'Courses' && search">
+            <ul v-for="course in searchedCourses">
+                <li>
+                    <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
+                    <p>{{course.name}}</p>
+                    <button v-on:click="enrollCourse" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                </li>
+                <hr>
+            </ul>
         </div>
 
         <div v-show="loggedIn && state === 'Forums'">

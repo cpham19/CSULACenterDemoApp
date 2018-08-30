@@ -49,5 +49,16 @@ module.exports = (server, db) => {
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
+
+        socket.on('enroll-course', (userName, course) => {
+            // enrolled course
+            db.enrollCourse(userName, course)
+                // success
+                .then(enrolled =>
+                    io.emit('successful-enroll-course', enrolled)
+                )
+                // error
+                .catch(err => io.emit('failed-enroll-course', { dept: course.dept }))
+        })
     })
 }

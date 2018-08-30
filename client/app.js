@@ -99,7 +99,18 @@ const app = new Vue({
             })
 
         },
-        enrollCourse: function () {
+        enrollCourse: function (course) {
+            var found = false
+            this.me.courses.forEach(courseObj => {
+                if (courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section) {
+                    found = true
+                }
+            })
+
+            if (found) {
+                return
+            }
+            socket.emit('enroll-course', this.me.name, course)
         },
     },
     components: {
@@ -145,4 +156,9 @@ socket.on('successful-add-course', courseObj => {
     app.courseSection = ''
     app.courseUnit = ''
     app.courses.push(courseObj)
+})
+
+// Added course
+socket.on('successful-enroll-course', course => {
+    app.me.courses.push(course)
 })

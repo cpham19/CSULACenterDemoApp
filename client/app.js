@@ -100,7 +100,7 @@ const app = new Vue({
 
         },
         enrollCourse: function (course) {
-            var found = false
+            let found = false
             this.me.courses.forEach(courseObj => {
                 if (courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section) {
                     found = true

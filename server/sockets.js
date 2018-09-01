@@ -60,5 +60,16 @@ module.exports = (server, db) => {
                 // error
                 .catch(err => io.emit('failed-enroll-course', { dept: course.dept }))
         })
+
+        socket.on('drop-course', (userName, course) => {
+            // drop course
+            db.dropCourse(userName, course)
+                // success
+                .then(dropped =>
+                    io.emit('successful-drop-course', dropped)
+                )
+                // error
+                .catch(err => io.emit('failed-drop-course', { dept: course.dept }))
+        })
     })
 }

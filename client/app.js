@@ -35,6 +35,7 @@ const app = new Vue({
         courseUnit: '',
         search: true,
         add: false,
+        drop: false,
         searchedCourses: []
     },
     created: function () {
@@ -63,17 +64,23 @@ const app = new Vue({
             this.state = state
         },
         changeCourseState: function (state) {
+            this.courseDept = ''
+            this.courseNumber = ''
+
             if (state === 'search') {
-                this.courseDept = ''
-                this.courseNumber = ''
                 this.search = true
                 this.add = false
+                this.drop = false
             }
             else if (state === 'add') {
-                this.courseDept = ''
-                this.courseNumber = ''
                 this.search = false
                 this.add = true
+                this.drop = false
+            }
+            else if (state === 'drop') {
+                this.search = false
+                this.add = false
+                this.drop = true
             }
         },
         addCourse: function () {
@@ -111,6 +118,11 @@ const app = new Vue({
                 return
             }
             socket.emit('enroll-course', this.me.name, course)
+        },
+        dropCourse: function (course) {
+            this.me.courses = this.me.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+
+            socket.emit('drop-course', this.me.name, course)
         },
     },
     components: {
@@ -161,4 +173,9 @@ socket.on('successful-add-course', courseObj => {
 // Added course
 socket.on('successful-enroll-course', course => {
     app.me.courses.push(course)
+})
+
+// Dropped course
+socket.on('successful-drop-course', course => {
+    console.log("DROPPED")
 })

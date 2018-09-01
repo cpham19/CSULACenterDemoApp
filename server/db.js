@@ -43,6 +43,9 @@ const findUserByName = userName => User.findOne({ name: { $regex: `^${userName}$
 
 const findCourseByDeptAndNumAndSection = (courseDept, courseNum, courseSection) => Course.findOne({ dept: courseDept, number: courseNum, section: courseSection })
 
+// Used for removing a course of a user  in database
+const removeCourse = (userName, course) => User.update( {name: userName}, {'$pull' : {courses : course}})
+
 // Validating user for logging in
 const loginUser = (userName, password, socketId) => {
     // Find if the username is in the db
@@ -147,6 +150,20 @@ const enrollCourse = (userName, course) => {
         })
 }
 
+// Drop course for user
+const dropCourse = (userName, course) => {
+    // Remove course
+    return removeCourse(userName, course)
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+            }
+            return course
+        })
+        // Return question
+        .then(courseObj => {return courseObj})
+}
+
 module.exports = {
     activeUsers,
     createUser,
@@ -154,5 +171,6 @@ module.exports = {
     logoutUser,
     addCourse,
     listOfCourses,
-    enrollCourse
+    enrollCourse,
+    dropCourse
 }

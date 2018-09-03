@@ -33,10 +33,14 @@ const app = new Vue({
         courseNumber: '',
         courseSection: '',
         courseUnit: '',
+        courseProf: '',
+        courseRoom: '',
         search: true,
         add: false,
         drop: false,
-        searchedCourses: []
+        remove: false,
+        searchedCourses: [],
+        addAssignment: false
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -71,20 +75,29 @@ const app = new Vue({
                 this.search = true
                 this.add = false
                 this.drop = false
+                this.remove = false
             }
             else if (state === 'add') {
                 this.search = false
                 this.add = true
                 this.drop = false
+                this.remove = false
             }
             else if (state === 'drop') {
                 this.search = false
                 this.add = false
                 this.drop = true
+                this.remove = false
+            }
+            else if (state === 'remove') {
+                this.search = false
+                this.add = false
+                this.drop = false
+                this.remove = true
             }
         },
         addCourse: function () {
-            socket.emit('add-course', this.courseDept, this.courseName, this.courseNumber, this.courseSection, this.courseUnit)
+            socket.emit('add-course', this.courseDept, this.courseName, this.courseNumber, this.courseSection, this.courseUnit, this.courseProf, this.courseRoom)
         },
         searchCourse: function () {
             // If courseDept is empty, do nothing
@@ -117,13 +130,18 @@ const app = new Vue({
             if (found) {
                 return
             }
+
             socket.emit('enroll-course', this.me.name, course)
         },
         dropCourse: function (course) {
-            this.me.courses = this.me.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
-
             socket.emit('drop-course', this.me.name, course)
         },
+        removeCourse: function (course) {
+            socket.emit('remove-course', course)
+        },
+        addAssignment: function (course) {
+            
+        }
     },
     components: {
     }
@@ -167,6 +185,8 @@ socket.on('successful-add-course', courseObj => {
     app.courseNumber = ''
     app.courseSection = ''
     app.courseUnit = ''
+    app.courseProf = ''
+    app.courseRoom = ''
     app.courses.push(courseObj)
 })
 
@@ -177,5 +197,10 @@ socket.on('successful-enroll-course', course => {
 
 // Dropped course
 socket.on('successful-drop-course', course => {
-    console.log("DROPPED")
+    app.me.courses = app.me.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+})
+
+// Dropped course
+socket.on('successful-remove-course', course => {
+    app.courses = app.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
 })

@@ -25,7 +25,10 @@ const CourseSchema = new Mongoose.Schema({
     name: String,
     number: Number,
     section: Number,
-    unit: Number
+    unit: Number,
+    prof: String,
+    room: String,
+    assignemnts: Array,
 }, { strict: false })
 
 const User = Mongoose.model('users', UserSchema)
@@ -41,10 +44,9 @@ const listOfCourses = () => Course.find({ dept: { $ne: null } })
 // Used for validating user for login using regular expression ('Bob' = 'bob')
 const findUserByName = userName => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
 
+// Used to check if a course exists already (based on dept, number, and section)
 const findCourseByDeptAndNumAndSection = (courseDept, courseNum, courseSection) => Course.findOne({ dept: courseDept, number: courseNum, section: courseSection })
 
-// Used for removing a course of a user  in database
-const removeCourse = (userName, course) => User.update( {name: userName}, {'$pull' : {courses : course}})
 
 // Validating user for logging in
 const loginUser = (userName, password, socketId) => {
@@ -111,9 +113,9 @@ const logoutUser = socketId => {
 }
 
 // Add course
-const addCourse = (courseDept, courseName, courseNumber, courseSection, courseUnit) => {
+const addCourse = (courseDept, courseName, courseNumber, courseSection, courseUnit, courseProf, courseRoom) => {
     // Return a user object if username is in db
-    return findCourseByDeptAndNumAndSection(courseDept, courseNumber, courseSection)
+    return findCourseByDeptAndNumAndSection(courseDept, courseNumber, courseSection, courseProf, courseRoom)
         .then(found => {
             // Check if course exists
             if (found) {
@@ -127,13 +129,16 @@ const addCourse = (courseDept, courseName, courseNumber, courseSection, courseUn
                 number: courseNumber,
                 section: courseSection,
                 unit: courseUnit,
+                prof: courseProf,
+                room: courseRoom,
+                assignments: []
             }
         })
         // Create course 
         .then(course => Course.create(course))
         // Return course dept, name, number, section, and unit
-        .then(({ dept, name, number, section, unit }) => {
-            return { dept, name, number, section, unit }
+        .then(({ dept, name, number, section, unit, prof, room, assignments}) => {
+            return { dept, name, number, section, unit, prof, room, assignments}
         })
 }
 
@@ -152,16 +157,26 @@ const enrollCourse = (userName, course) => {
 
 // Drop course for user
 const dropCourse = (userName, course) => {
-    // Remove course
-    return removeCourse(userName, course)
+    // Drop course
+    return User.update( {name: userName}, {'$pull' : {courses : course}})
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
             }
             return course
         })
-        // Return question
-        .then(courseObj => {return courseObj})
+}
+
+// Remove course
+const removeCourse = (course) => {
+    // Remove course
+    return Course.remove({dept: course.dept, number: course.number, section: course.section})
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+            }
+            return course
+        })
 }
 
 module.exports = {
@@ -172,5 +187,6 @@ module.exports = {
     addCourse,
     listOfCourses,
     enrollCourse,
-    dropCourse
+    dropCourse,
+    removeCourse
 }

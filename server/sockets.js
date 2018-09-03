@@ -37,9 +37,9 @@ module.exports = (server, db) => {
                 .then(users => io.emit('refresh-users', users))
         })
 
-        socket.on('add-course', (courseDept, courseName, courseNumber, courseSection, courseUnit) => {
+        socket.on('add-course', (courseDept, courseName, courseNumber, courseSection, courseUnit, courseProf, courseRoom) => {
             // add course
-            db.addCourse(courseDept, courseName, courseNumber, courseSection, courseUnit)
+            db.addCourse(courseDept, courseName, courseNumber, courseSection, courseUnit, courseProf, courseRoom)
                 // success
                 .then(added =>
                     io.emit('successful-add-course', added)
@@ -70,6 +70,17 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-drop-course', { dept: course.dept }))
+        })
+
+        socket.on('remove-course', (course) => {
+            // remove course
+            db.removeCourse(course)
+                // success
+                .then(removed =>
+                    io.emit('successful-remove-course', removed)
+                )
+                // error
+                .catch(err => io.emit('failed-remove-course', { dept: course.dept }))
         })
     })
 }

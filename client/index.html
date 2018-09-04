@@ -98,6 +98,9 @@
             <div class="column">
                 <button class="block" v-on:click="changeCourseState('remove')" type="submit">Remove Course</button>
             </div>
+            <div class="column">
+                <button class="block" v-on:click="changeCourseState('edit')" type="submit">Edit Course</button>
+            </div>
         </div>
 
         <!-- For Searching Courses -->
@@ -176,6 +179,32 @@
             </ul>
         </div>
 
+        <!-- Editting Courses -->
+        <div v-show="loggedIn && state === 'Courses' && edit">
+            <select class="browser-default" v-model="newCourse">
+                <option v-for="course in courses" v-bind:value="course">{{course.dept}}{{course.number}}-{{course.section}}-{{course.name}}</option>
+            </select>
+            <div v-show="newCourse">
+                <select class="browser-default" v-model="newCourse.dept">
+                    <option disabled value="">course dept</option>
+                    <option>CS</option>
+                    <option>ME</option>
+                    <option>BIOL</option>
+                    <option>PHYS</option>
+                    <option>CHEM</option>
+                    <option>COMM</option>
+                    <option>CE</option>
+                </select>
+                <input v-model="newCourse.name" placeholder="course name" type="text">
+                <input v-model="newCourse.number" placeholder="course number" type="text">
+                <input v-model="newCourse.section" placeholder="course section" type="text">
+                <textarea v-model="newCourse.description" placeholder="course description"></textarea>
+                <input v-model="newCourse.unit" placeholder="course unit" type="text">
+                <input v-model="newCourse.prof" placeholder="course professor" type="text">
+                <input v-model="newCourse.room" placeholder="course room" type="text">
+                <button v-on:click="editCourse(newCourse)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
+            </div>
+        </div>
 
         <!-- Assignments Page -->
         <div v-show="loggedIn && state === 'Assignments' && !addingAssignment">

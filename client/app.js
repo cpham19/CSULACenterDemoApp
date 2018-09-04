@@ -40,12 +40,14 @@ const app = new Vue({
         add: false,
         drop: false,
         remove: false,
+        edit: false,
         searchedCourses: [],
         addingAssignment: false,
         postingAssignment: false,
         assignmentOfCourse: '',
         assignmentTitle: '',
         assignmentDescription: '',
+        newCourse: '',
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -82,24 +84,35 @@ const app = new Vue({
                 this.add = false
                 this.drop = false
                 this.remove = false
+                this.edit = false
             }
             else if (state === 'add') {
                 this.search = false
                 this.add = true
                 this.drop = false
                 this.remove = false
+                this.edit = false
             }
             else if (state === 'drop') {
                 this.search = false
                 this.add = false
                 this.drop = true
                 this.remove = false
+                this.edit = false
             }
             else if (state === 'remove') {
                 this.search = false
                 this.add = false
                 this.drop = false
                 this.remove = true
+                this.edit = false
+            }
+            else if (state === 'edit') {
+                this.search = false
+                this.add = false
+                this.drop = false
+                this.remove = false
+                this.edit = true
             }
         },
         addCourse: function () {
@@ -123,7 +136,7 @@ const app = new Vue({
 
             // Filter the search results based on the user's enrolled courses
             this.me.courses.forEach(courseObj => {
-                this.searchedCourses = this.searchedCourses.filter(course => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+                this.searchedCourses = this.searchedCourses.filter(course => !(courseObj._id === course._id))
             })
         },
         enrollCourse: function (course) {
@@ -134,6 +147,9 @@ const app = new Vue({
         },
         removeCourse: function (course) {
             socket.emit('remove-course', course)
+        },
+        editCourse: function (newCourse) {
+            socket.emit('edit-course', newCourse)
         },
         addAssignment: function (course) {
             this.addingAssignment = true
@@ -199,24 +215,38 @@ socket.on('successful-enroll-course', course => {
     app.me.courses.push(course)
 
     // Filter the search results after enrolling a course
-    app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+    app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj._id === course._id))
 })
 
 // Dropped course
 socket.on('successful-drop-course', course => {
-    app.me.courses = app.me.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+    app.me.courses = app.me.courses.filter(courseObj => !(courseObj._id === course._id))
 })
 
 // Remove course
 socket.on('successful-remove-course', course => {
-    app.courses = app.courses.filter(courseObj => !(courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section))
+    app.courses = app.courses.filter(courseObj => !(courseObj._id === course._id))
+})
+
+// Edit course
+socket.on('successful-edit-course', course => {
+    app.courses = app.courses.map(courseObj => {
+        if (courseObj._id === course._id) {
+            courseObj = course
+            return courseObj
+        }
+
+        return courseObj
+    })
+
+    app.newCourse = ''
 })
 
 
 // Posted assignment
 socket.on('successful-post-assignment', obj => {
     app.courses = app.courses.map(courseObj => {
-        if (courseObj.dept === obj.course.dept && courseObj.number == obj.course.number && courseObj.section == obj.course.section) {
+        if (courseObj._id === course._id) {
             courseObj.assignments.push(obj.assignment)
             return courseObj
         }

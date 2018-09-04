@@ -148,7 +148,7 @@ const enrollCourse = (userName, course) => {
     return User.findOneAndUpdate({ name: userName }, { "$push": { courses: course } })
         .then(user => {
             user.courses.forEach(courseObj => {
-                if (courseObj.dept === course.dept && courseObj.number == course.number && courseObj.section == course.section) {
+                if (courseObj._id === course._id) {
                     throw new Error('User is already enrolled in the course!')
                 }
             })
@@ -172,7 +172,7 @@ const dropCourse = (userName, course) => {
 // Remove course
 const removeCourse = (course) => {
     // Remove course
-    return Course.remove({ dept: course.dept, number: course.number, section: course.section })
+    return Course.remove({ _id: course._id})
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -180,6 +180,21 @@ const removeCourse = (course) => {
             return course
         })
 }
+
+// Edit course
+const editCourse = (course) => {
+    // Edit course
+    return Course.findOneAndUpdate({ _id: course._id}, { $set: { dept: course.dept, name: course.name, number: course.number, section: course.section, description : course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: []}})
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+
+            }
+            return course
+        })
+}
+
+
 
 // Post assignment
 const postAssignment = (course, assignment) => {
@@ -203,5 +218,6 @@ module.exports = {
     enrollCourse,
     dropCourse,
     removeCourse,
+    editCourse,
     postAssignment
 }

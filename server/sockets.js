@@ -83,6 +83,19 @@ module.exports = (server, db) => {
                 .catch(err => io.emit('failed-remove-course', { dept: course.dept }))
         })
 
+        socket.on('edit-course', (course) => {
+            // edit course
+            db.editCourse(course)
+                // success
+                .then(editted =>
+                    io.emit('successful-edit-course', editted)
+                )
+                // error
+                .catch(err => io.emit('failed-edit-course', { dept: course.dept }))
+
+            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+        })
+
         socket.on('post-assignment', (course, assignment) => {
             // Post assignment
             db.postAssignment(course, assignment)

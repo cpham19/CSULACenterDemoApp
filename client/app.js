@@ -43,11 +43,13 @@ const app = new Vue({
         edit: false,
         searchedCourses: [],
         addingAssignment: false,
+        edittingAssignment: false,
         postingAssignment: false,
         assignmentOfCourse: '',
         assignmentTitle: '',
         assignmentDescription: '',
         newCourse: '',
+        newAssignment: ''
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -153,7 +155,13 @@ const app = new Vue({
         },
         addAssignment: function (course) {
             this.addingAssignment = true
+            this.edittingAssignment = false
             this.assignmentOfCourse = course
+        },
+        editAssignment: function (assignment) {
+            this.addingAssignment = false
+            this.edittingAssignment = true
+            this.newAssignment = assignment
         },
         postAssignment: function (course, assignmentTitle, assignmentDescription) {
             this.addingAssignment = false
@@ -235,8 +243,9 @@ socket.on('successful-edit-course', course => {
             courseObj = course
             return courseObj
         }
-
-        return courseObj
+        else {
+            return courseObj
+        }
     })
 
     app.newCourse = ''
@@ -246,7 +255,7 @@ socket.on('successful-edit-course', course => {
 // Posted assignment
 socket.on('successful-post-assignment', obj => {
     app.courses = app.courses.map(courseObj => {
-        if (courseObj._id === course._id) {
+        if (courseObj._id === obj.course._id) {
             courseObj.assignments.push(obj.assignment)
             return courseObj
         }

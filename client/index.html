@@ -207,14 +207,15 @@
         </div>
 
         <!-- Assignments Page -->
-        <div v-show="loggedIn && state === 'Assignments' && !addingAssignment">
+        <div v-show="loggedIn && state === 'Assignments' && !addingAssignment && !edittingAssignment">
             <ul v-for="course in courses">
                 <li v-show="course.prof === me.name">
                     <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
                             class="btn-small waves-effect waves-light" type="submit">+</button></h1>
                     <ul v-for="assignment in course.assignments">
                         <li>
-                            <p>{{assignment.title}}</p>
+                            <p>{{assignment.title}} <button v-on:click="editAssignment(assignment)" class="btn-small waves-effect waves-light"
+                                    type="submit">Edit</button></p>
                         </li>
                     </ul>
                 </li>
@@ -222,6 +223,7 @@
             </ul>
         </div>
 
+        <!-- Adding assignments -->
         <div v-show="loggedIn && state === 'Assignments' && addingAssignment">
             <h1>Adding assignment to {{assignmentOfCourse.dept}}{{assignmentOfCourse.number}}-{{assignmentOfCourse.section}}
                 {{assignmentOfCourse.name}}
@@ -232,9 +234,12 @@
                 type="submit">Post</button>
         </div>
 
-
-        <div v-show="loggedIn && state === 'Forums'">
-            <p>Forums Page</p>
+        <!-- Editting assignments -->
+        <div v-show="loggedIn && state === 'Assignments' && edittingAssignment">
+            <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
+            <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
+            <button v-on:click="postAssignment(newAssignment)" class="btn-small waves-effect waves-light"
+                type="submit">Post</button>
         </div>
     </div>
 

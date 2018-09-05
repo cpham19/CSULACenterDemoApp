@@ -81,6 +81,8 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-remove-course', { dept: course.dept }))
+
+            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
 
         socket.on('edit-course', (course) => {
@@ -105,6 +107,32 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-post-assignment', 'Failed to post assignment'))
+
+            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+        })
+
+        socket.on('remove-assignment', (course, assignment) => {
+            // remove course
+            db.removeAssignment(course, assignment)
+                // success
+                .then(removed =>
+                    io.emit('successful-remove-assignment', removed)
+                )
+                // error
+                .catch(err => io.emit('failed-remove-assignment', { title: assignment.title }))
+
+            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+        })
+
+        socket.on('edit-assignment', (course, assignment) => {
+            // Edit assignment
+            db.editAssignment(course, assignment)
+                // success
+                .then(obj =>
+                    io.emit('successful-edit-assignment', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-edit-assignment', 'Failed to edit assignment'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })

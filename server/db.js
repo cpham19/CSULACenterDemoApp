@@ -1,8 +1,7 @@
 const
     config = require('./config.json'),
     Mongoose = require('mongoose'),
-    { generateHash, validatePassword } = require('./validate'),
-    random = require('mongoose-simple-random');
+    { generateHash, validatePassword } = require('./validate')
 
 Mongoose.connect(config.uri)
 Mongoose.connection.on('error', err => {
@@ -172,7 +171,7 @@ const dropCourse = (userName, course) => {
 // Remove course
 const removeCourse = (course) => {
     // Remove course
-    return Course.remove({ _id: course._id})
+    return Course.remove({ _id: course._id })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -184,7 +183,7 @@ const removeCourse = (course) => {
 // Edit course
 const editCourse = (course) => {
     // Edit course
-    return Course.findOneAndUpdate({ _id: course._id}, { $set: { dept: course.dept, name: course.name, number: course.number, section: course.section, description : course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: []}})
+    return Course.findOneAndUpdate({ _id: course._id }, { $set: { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: [] } })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -194,17 +193,41 @@ const editCourse = (course) => {
         })
 }
 
-
-
 // Post assignment
 const postAssignment = (course, assignment) => {
-    return Course.findOneAndUpdate({ dept: course.dept, number: course.number, section: course.section }, { "$push": { assignments: assignment } })
+    return Course.findOneAndUpdate({ _id: course._id }, { "$push": { assignments: assignment } })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
             }
 
-            return {course: course, assignment: assignment}
+            return { course: course, assignment: assignment }
+        })
+}
+
+// Remove assignment
+const removeAssignment = (course, assignment) => {
+    // Remove course
+    return Course.update({ _id: course._id }, { '$pull': { assignments: assignment } })
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+            }
+
+            return { course: course, assignment: assignment }
+        })
+}
+
+
+// Edit assignment
+const editAssignment = (course, assignment) => {
+    return Course.findOneAndUpdate({ _id: course._id }, { "$push": { assignments: assignment } })
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+            }
+
+            return { course: course, assignment: assignment }
         })
 }
 
@@ -219,5 +242,7 @@ module.exports = {
     dropCourse,
     removeCourse,
     editCourse,
-    postAssignment
+    postAssignment,
+    editAssignment,
+    removeAssignment
 }

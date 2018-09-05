@@ -45,11 +45,12 @@ const app = new Vue({
         addingAssignment: false,
         edittingAssignment: false,
         postingAssignment: false,
-        assignmentOfCourse: '',
+        assignmentOfCourseToEdit: '',
         assignmentTitle: '',
         assignmentDescription: '',
         newCourse: '',
-        newAssignment: ''
+        newAssignment: '',
+        courseOfAssignmentToEdit: ''
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -156,18 +157,29 @@ const app = new Vue({
         addAssignment: function (course) {
             this.addingAssignment = true
             this.edittingAssignment = false
-            this.assignmentOfCourse = course
-        },
-        editAssignment: function (assignment) {
-            this.addingAssignment = false
-            this.edittingAssignment = true
-            this.newAssignment = assignment
+            this.assignmentOfCourseToEdit = course
         },
         postAssignment: function (course, assignmentTitle, assignmentDescription) {
             this.addingAssignment = false
-            this.assignmentOfCourse = ''
-            const assignment = {title: assignmentTitle, description: assignmentDescription}
+            this.assignmentOfCourseToEdit = ''
+
+            const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
+            const assignment = {id: randomId, title: assignmentTitle, description: assignmentDescription}
             socket.emit('post-assignment', course, assignment)
+        },
+        removeAssignment: function (course, assignment) {
+            socket.emit('remove-assignment', course, assignment)
+        },
+        selectAssignmentToEdit: function (course, assignment) {
+            this.addingAssignment = false
+            this.edittingAssignment = true
+            this.newAssignment = assignment
+            this.courseOfAssignmentToEdit = course
+        },
+        editAssignment: function (course, assignment) {
+            this.addingAssignment = false
+            this.edittingAssignment = false
+            socket.emit('edit-assignment', course, assignment)
         }
     },
     components: {
@@ -249,6 +261,25 @@ socket.on('successful-edit-course', course => {
     })
 
     app.newCourse = ''
+})
+
+// Remove course
+socket.on('successful-edit-assignment', course => {
+    app.courses = app.courses.filter(courseObj => !(courseObj._id === course._id))
+})
+
+// Remove assignemnt
+socket.on('successful-remove-assignment', obj => {
+    app.courses = app.courses.map(courseObj => {
+        if (courseObj._id === obj.course._id) {
+            courseObj.assignments = courseObj.assignments.filter(assignment => !(assignment.id === obj.assignment.id))
+
+            return courseObj
+        }
+        else {
+            return courseObj
+        }
+    })
 })
 
 

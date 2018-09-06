@@ -7,6 +7,7 @@ module.exports = (server, db) => {
         // when a connection is made - load in the content already present on the server
         db.activeUsers().then(users => socket.emit('refresh-users', users))
         db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+        db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
 
         // demo code only for sockets + db
         // in production login/user creation should happen with a POST to https endpoint
@@ -50,39 +51,40 @@ module.exports = (server, db) => {
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
 
-        socket.on('enroll-course', (userName, course) => {
+        socket.on('enroll-course', (userName, courseId) => {
             // enrolled course
-            db.enrollCourse(userName, course)
+            db.enrollCourse(userName, courseId)
                 // success
                 .then(enrolled =>
                     io.emit('successful-enroll-course', enrolled)
                 )
                 // error
-                .catch(err => io.emit('failed-enroll-course', { dept: course.dept }))
+                .catch(err => io.emit('failed-enroll-course', 'Failed to enroll course'))
         })
 
-        socket.on('drop-course', (userName, course) => {
+        socket.on('drop-course', (userName, courseId) => {
             // drop course
-            db.dropCourse(userName, course)
+            db.dropCourse(userName, courseId)
                 // success
                 .then(dropped =>
                     io.emit('successful-drop-course', dropped)
                 )
                 // error
-                .catch(err => io.emit('failed-drop-course', { dept: course.dept }))
+                .catch(err => io.emit('failed-drop-course', 'Fail to drop course'))
         })
 
-        socket.on('remove-course', (course) => {
+        socket.on('remove-course', (courseId) => {
             // remove course
-            db.removeCourse(course)
+            db.removeCourse(courseId)
                 // success
                 .then(removed =>
                     io.emit('successful-remove-course', removed)
                 )
                 // error
-                .catch(err => io.emit('failed-remove-course', { dept: course.dept }))
+                .catch(err => io.emit('failed-remove-course', 'Failed to remove course'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
         socket.on('edit-course', (course) => {
@@ -93,7 +95,7 @@ module.exports = (server, db) => {
                     io.emit('successful-edit-course', editted)
                 )
                 // error
-                .catch(err => io.emit('failed-edit-course', { dept: course.dept }))
+                .catch(err => io.emit('failed-edit-course', 'Failed to edit course'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
@@ -109,6 +111,7 @@ module.exports = (server, db) => {
                 .catch(err => io.emit('failed-post-assignment', 'Failed to post assignment'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
         socket.on('remove-assignment', (course, assignment) => {
@@ -119,9 +122,10 @@ module.exports = (server, db) => {
                     io.emit('successful-remove-assignment', removed)
                 )
                 // error
-                .catch(err => io.emit('failed-remove-assignment', { title: assignment.title }))
+                .catch(err => io.emit('failed-remove-assignment', 'Failed to remove assignment'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
         socket.on('edit-assignment', (course, assignment) => {
@@ -133,8 +137,8 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-edit-assignment', 'Failed to edit assignment'))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
+                
+            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
     })
 }

@@ -27,6 +27,7 @@ const app = new Vue({
         me: {},
         users: [],
         courses: [],
+        assignments: [],
         state: 'Home',
         courseDept: '',
         courseName: '',
@@ -132,26 +133,43 @@ const app = new Vue({
                 return
             }
 
+            this.searchedCourses = []
+
             // Filter the complete list of courses in database
             // If user only selected a department OR
             // If user selected a department and typed a course number
             this.searchedCourses = this.courses.filter(course => (course.dept === this.courseDept && !this.courseNumber) || (course.dept === this.courseDept && course.number == this.courseNumber))
 
             // Filter the search results based on the user's enrolled courses
-            this.me.courses.forEach(courseObj => {
-                this.searchedCourses = this.searchedCourses.filter(course => !(courseObj._id === course._id))
+            this.me.courses.forEach(courseId => {
+                this.searchedCourses = this.searchedCourses.filter(course => !(courseId === course._id))
             })
         },
-        enrollCourse: function (course) {
-            socket.emit('enroll-course', this.me.name, course)
+        enrollCourse: function (courseId) {
+            if (!courseId) {
+                return
+            }
+
+            socket.emit('enroll-course', this.me.name, courseId)
         },
-        dropCourse: function (course) {
-            socket.emit('drop-course', this.me.name, course)
+        dropCourse: function (courseId) {
+            if (!courseId) {
+                return
+            }
+
+            socket.emit('drop-course', this.me.name, courseId)
         },
-        removeCourse: function (course) {
-            socket.emit('remove-course', course)
+        removeCourse: function (courseId) {
+            if (!courseId) {
+                return
+            }
+            
+            socket.emit('remove-course', courseId)
         },
         editCourse: function (newCourse) {
+            if (!newCourse) {
+                return
+            }
             socket.emit('edit-course', newCourse)
         },
         addAssignment: function (course) {
@@ -163,8 +181,7 @@ const app = new Vue({
             this.addingAssignment = false
             this.assignmentOfCourseToEdit = ''
 
-            const randomId = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15)
-            const assignment = {id: randomId, title: assignmentTitle, description: assignmentDescription}
+            const assignment = {title: assignmentTitle, description: assignmentDescription}
             socket.emit('post-assignment', course, assignment)
         },
         removeAssignment: function (course, assignment) {
@@ -198,6 +215,11 @@ socket.on('refresh-courses', courses => {
     app.courses = courses
 })
 
+// Refresh assignments
+socket.on('refresh-assignments', assignments => {
+    app.assignments = assignments
+})
+
 // Successfully join (change screen)
 socket.on('successful-join', user => {
     if (app.userName === user.name) {
@@ -219,6 +241,7 @@ socket.on('failed-join', obj => {
 
 // Added course
 socket.on('successful-add-course', courseObj => {
+    console.log("ADDED THE COURSE: " + courseObj._id)
     app.courseDept = ''
     app.courseName = ''
     app.courseNumber = ''
@@ -231,25 +254,29 @@ socket.on('successful-add-course', courseObj => {
 })
 
 // Added course
-socket.on('successful-enroll-course', course => {
-    app.me.courses.push(course)
+socket.on('successful-enroll-course', courseId => {
+    console.log("ENROLLED THE COURSE: " + courseId)
+    app.me.courses.push(courseId)
 
     // Filter the search results after enrolling a course
-    app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj._id === course._id))
+    app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj._id === courseId))
 })
 
 // Dropped course
-socket.on('successful-drop-course', course => {
-    app.me.courses = app.me.courses.filter(courseObj => !(courseObj._id === course._id))
+socket.on('successful-drop-course', courseId => {
+    console.log("DROPPED THE COURSE: " + courseId)
+    app.me.courses = app.me.courses.filter(courseObj => !(courseObj === courseId))
 })
 
 // Remove course
-socket.on('successful-remove-course', course => {
-    app.courses = app.courses.filter(courseObj => !(courseObj._id === course._id))
+socket.on('successful-remove-course', courseId => {
+    console.log("REMOVED THE COURSE: " + courseId)
+    app.courses = app.courses.filter(courseObj => !(courseObj._id === courseId))
 })
 
 // Edit course
 socket.on('successful-edit-course', course => {
+    console.log("EDITTED THE COURSE: " + courseId)
     app.courses = app.courses.map(courseObj => {
         if (courseObj._id === course._id) {
             courseObj = course
@@ -264,12 +291,13 @@ socket.on('successful-edit-course', course => {
 })
 
 // Remove course
-socket.on('successful-edit-assignment', course => {
-    app.courses = app.courses.filter(courseObj => !(courseObj._id === course._id))
+socket.on('successful-edit-assignment', obj => {
+    console.log(obj)
 })
 
 // Remove assignemnt
 socket.on('successful-remove-assignment', obj => {
+    console.log("REMOVED THE ASSIGNMENT: " + obj._id)
     app.courses = app.courses.map(courseObj => {
         if (courseObj._id === obj.course._id) {
             courseObj.assignments = courseObj.assignments.filter(assignment => !(assignment.id === obj.assignment.id))
@@ -285,6 +313,7 @@ socket.on('successful-remove-assignment', obj => {
 
 // Posted assignment
 socket.on('successful-post-assignment', obj => {
+    console.log("POSTED THE ASSIGNMENT: " + obj._id)
     app.courses = app.courses.map(courseObj => {
         if (courseObj._id === obj.course._id) {
             courseObj.assignments.push(obj.assignment)

@@ -31,15 +31,26 @@ const CourseSchema = new Mongoose.Schema({
     assignments: Array,
 }, { strict: false })
 
+// Schema for Assignments
+const AssignmentSchema = new Mongoose.Schema({
+    title: String,
+    description: String,
+}, { strict: false })
+
 const User = Mongoose.model('users', UserSchema)
 
 const Course = Mongoose.model('courses', CourseSchema)
+
+const Assignment = Mongoose.model('assignments', AssignmentSchema)
 
 // Array of users
 const activeUsers = () => User.find({ socketId: { $ne: null } }, { password: 0 })
 
 // Array of courses
 const listOfCourses = () => Course.find({ dept: { $ne: null } })
+
+// Array of assignments
+const listOfAssignments = () => Assignment.find({ title: { $ne: null } })
 
 // Used for validating user for login using regular expression ('Bob' = 'bob')
 const findUserByName = userName => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
@@ -138,45 +149,47 @@ const addCourse = (courseDept, courseName, courseNumber, courseSection, courseDe
         // Create course 
         .then(course => Course.create(course))
         // Return course dept, name, number, section, and unit
-        .then(({ dept, name, number, section, description, unit, prof, room, assignments }) => {
-            return { dept, name, number, section, description, unit, prof, room, assignments }
+        .then(({_id, dept, name, number, section, description, unit, prof, room, assignments }) => {
+            return {_id, dept, name, number, section, description, unit, prof, room, assignments }
         })
 }
 
-const enrollCourse = (userName, course) => {
-    return User.findOneAndUpdate({ name: userName }, { "$push": { courses: course } })
+const enrollCourse = (userName, courseId) => {
+    return User.findOneAndUpdate({ name: userName }, { "$push": { courses: courseId } })
         .then(user => {
             user.courses.forEach(courseObj => {
-                if (courseObj._id === course._id) {
+                if (courseObj === courseId) {
                     throw new Error('User is already enrolled in the course!')
                 }
             })
 
-            return course
+            return courseId
         })
 }
 
 // Drop course for user
-const dropCourse = (userName, course) => {
+const dropCourse = (userName, courseId) => {
     // Drop course
-    return User.update({ name: userName }, { '$pull': { courses: course } })
+    return User.findOneAndUpdate({ name: userName }, { '$pull': { courses: courseId } })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
             }
-            return course
+            return courseId
         })
 }
 
 // Remove course
-const removeCourse = (course) => {
+const removeCourse = (courseId) => {
     // Remove course
-    return Course.remove({ _id: course._id })
+    return Course.remove({ _id: courseId })
+        .then(({ _id }) => User.updateMany({}, { "$pull": { courses: courseId }}))
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
             }
-            return course
+
+            return courseId
         })
 }
 
@@ -189,7 +202,7 @@ const editCourse = (course) => {
                 throw new Error('Course does not exist')
 
             }
-            return course
+            return course._id
         })
 }
 
@@ -209,6 +222,7 @@ const postAssignment = (course, assignment) => {
 const removeAssignment = (course, assignment) => {
     // Remove course
     return Course.update({ _id: course._id }, { '$pull': { assignments: assignment } })
+        .then 
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -221,13 +235,18 @@ const removeAssignment = (course, assignment) => {
 
 // Edit assignment
 const editAssignment = (course, assignment) => {
-    return Course.findOneAndUpdate({ _id: course._id }, { "$push": { assignments: assignment } })
+    return Course.findOneAndUpdate({ _id: course._id }, { "$pull": { assignments: assignment} })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
             }
 
             return { course: course, assignment: assignment }
+        })
+        .then(obj => {
+            Course.findOneAndUpdate({ _id: obj.course._id }, { "$push": { assignments: obj.assignment} })
+
+            return
         })
 }
 
@@ -238,6 +257,7 @@ module.exports = {
     logoutUser,
     addCourse,
     listOfCourses,
+    listOfAssignments,
     enrollCourse,
     dropCourse,
     removeCourse,

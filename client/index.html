@@ -68,13 +68,15 @@
                 <div class="course-list">
                     <h4 align="center">Current Courses</h4>
                     <hr/>
-                    <ul v-for="course in me.courses">
-                        <li>
-                            <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
-                            <p>{{course.name}}</p>
-                            <p>{{course.prof}} {{course.room}}</p>
-                        </li>
-                        <hr>
+                    <ul v-for="courseId in me.courses">
+                        <template v-for="courseObj in courses">
+                            <li v-show="courseId === courseObj._id">
+                                <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}</p>
+                                <p>{{courseObj.name}}</p>
+                                <p>{{courseObj.prof}} {{courseObj.room}}</p>
+                            </li>    
+                        </template>
+                        <hr/>
                     </ul>
                 </div>
             </div>
@@ -149,7 +151,7 @@
                     <p>{{course.name}}</p>
                     <p>{{course.description}}</p>
                     <p>{{course.prof}} {{course.room}}</p>
-                    <button v-on:click="enrollCourse(course)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                    <button v-on:click="enrollCourse(course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
                 </li>
                 <hr>
             </ul>
@@ -157,14 +159,16 @@
 
         <!-- Dropping Courses -->
         <div v-show="loggedIn && state === 'Courses' && drop">
-            <ul v-for="course in me.courses">
-                <li>
-                    <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
-                    <p>{{course.name}}</p>
-                    <p>{{course.prof}} {{course.room}}</p>
-                    <button v-on:click="dropCourse(course)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
-                </li>
-                <hr>
+            <ul v-for="courseId in me.courses">
+                <template v-for="courseObj in courses">
+                    <li v-show="courseId === courseObj._id">
+                        <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}</p>
+                        <p>{{courseObj.name}}</p>
+                        <p>{{courseObj.prof}} {{courseObj.room}}</p>
+                        <button v-on:click="dropCourse(courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
+                    </li>
+                </template>
+                <hr/>
             </ul>
         </div>
 
@@ -172,7 +176,7 @@
         <div v-show="loggedIn && state === 'Courses' && remove">
             <ul v-for="course in courses">
                 <li>
-                    <p>{{course.dept}} {{course.number}}-{{course.section}} {{course.name}} <button v-on:click="removeCourse(course)"
+                    <p>{{course.dept}} {{course.number}}-{{course.section}} {{course.name}} <button v-on:click="removeCourse(course._id)"
                             class="btn-small waves-effect waves-light" type="submit">Remove</button></p>
                 </li>
                 <hr>
@@ -214,14 +218,14 @@
                             class="btn-small waves-effect waves-light" type="submit">+</button></h1>
                     <ul v-for="assignment in course.assignments">
                         <li>
-                            <p>{{assignment.title}} 
-                                <button v-on:click="selectAssignmentToEdit(course, assignment)" class="btn-small waves-effect waves-light"type="submit">Edit</button>
-                                <button v-on:click="removeAssignment(course, assignment)" class="btn-small waves-effect waves-light"type="submit">Remove</button>
+                            <p>{{assignment.title}}
+                                <button v-on:click="selectAssignmentToEdit(course, assignment)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
+                                <button v-on:click="removeAssignment(course, assignment)" class="btn-small waves-effect waves-light" type="submit">Remove</button>
                             </p>
                         </li>
                     </ul>
                 </li>
-                <hr>
+                <hr/>
             </ul>
         </div>
 
@@ -240,8 +244,8 @@
         <div v-show="loggedIn && state === 'Assignments' && edittingAssignment">
             <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
             <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
-            <button v-on:click="editAssignment(courseOfAssignmentToEdit, newAssignment)" class="btn-small waves-effect waves-light"
-                type="submit">Submit Changes</button>
+            <button v-on:click="editAssignment(courseOfAssignmentToEdit, newAssignment)" class="btn-small waves-effect waves-light" type="submit">Submit
+                Changes</button>
         </div>
     </div>
 

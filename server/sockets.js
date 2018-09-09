@@ -38,9 +38,9 @@ module.exports = (server, db) => {
                 .then(users => io.emit('refresh-users', users))
         })
 
-        socket.on('add-course', (courseDept, courseName, courseNumber, courseSection, courseDescription, courseUnit, courseProf, courseRoom) => {
+        socket.on('add-course', (course) => {
             // add course
-            db.addCourse(courseDept, courseName, courseNumber, courseSection, courseDescription, courseUnit, courseProf, courseRoom)
+            db.addCourse(course)
                 // success
                 .then(added =>
                     io.emit('successful-add-course', added)
@@ -84,7 +84,7 @@ module.exports = (server, db) => {
                 .catch(err => io.emit('failed-remove-course', 'Failed to remove course'))
 
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
-            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
+            db.listOfys().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
         socket.on('edit-course', (course) => {
@@ -100,9 +100,9 @@ module.exports = (server, db) => {
             db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
 
-        socket.on('post-assignment', (course, assignment) => {
+        socket.on('post-assignment', (courseId, assignment) => {
             // Post assignment
-            db.postAssignment(course, assignment)
+            db.postAssignment(courseId, assignment)
                 // success
                 .then(obj =>
                     io.emit('successful-post-assignment', obj)

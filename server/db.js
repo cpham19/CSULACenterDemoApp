@@ -53,10 +53,13 @@ const listOfCourses = () => Course.find({ dept: { $ne: null } })
 const listOfAssignments = () => Assignment.find({ title: { $ne: null } })
 
 // Used for validating user for login using regular expression ('Bob' = 'bob')
-const findUserByName = userName => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
+const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
 
 // Used to check if a course exists already (based on dept, number, and section)
-const findCourseByDeptAndNumAndSection = (courseDept, courseNum, courseSection) => Course.findOne({ dept: courseDept, number: courseNum, section: courseSection })
+const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: course.dept, number: course.num, section: course.section })
+
+// Used to check if an assignment exists already 
+const findAssignment = (courseId, assignment) => Assignment.findOne({ title: assignment.title, description: assignment.description })
 
 
 // Validating user for logging in
@@ -124,9 +127,9 @@ const logoutUser = socketId => {
 }
 
 // Add course
-const addCourse = (courseDept, courseName, courseNumber, courseSection, courseDescription, courseUnit, courseProf, courseRoom) => {
+const addCourse = (course) => {
     // Return a user object if username is in db
-    return findCourseByDeptAndNumAndSection(courseDept, courseNumber, courseSection, courseDescription, courseProf, courseRoom)
+    return findCourseByDeptAndNumAndSection(course)
         .then(found => {
             // Check if course exists
             if (found) {
@@ -135,33 +138,33 @@ const addCourse = (courseDept, courseName, courseNumber, courseSection, courseDe
 
             // Return an object if username doesnt exist
             return {
-                dept: courseDept,
-                name: courseName,
-                number: courseNumber,
-                section: courseSection,
-                description: courseDescription,
-                unit: courseUnit,
-                prof: courseProf,
-                room: courseRoom,
+                dept: course.dept,
+                name: course.name,
+                number: course.number,
+                section: course.section,
+                description: course.description,
+                unit: course.unit,
+                prof: course.prof,
+                room: course.room,
                 assignments: []
             }
         })
         // Create course 
         .then(course => Course.create(course))
         // Return course dept, name, number, section, and unit
-        .then(({_id, dept, name, number, section, description, unit, prof, room, assignments }) => {
-            return {_id, dept, name, number, section, description, unit, prof, room, assignments }
+        .then(({ _id, dept, name, number, section, description, unit, prof, room, assignments }) => {
+            return { _id, dept, name, number, section, description, unit, prof, room, assignments }
         })
 }
 
+// Enroll course for user
 const enrollCourse = (userName, courseId) => {
+    // Enroll course
     return User.findOneAndUpdate({ name: userName }, { "$push": { courses: courseId } })
-        .then(user => {
-            user.courses.forEach(courseObj => {
-                if (courseObj === courseId) {
-                    throw new Error('User is already enrolled in the course!')
-                }
-            })
+        .then(found => {
+            if (!found) {
+                throw new Error('Course does not exist')
+            }
 
             return courseId
         })
@@ -183,7 +186,7 @@ const dropCourse = (userName, courseId) => {
 const removeCourse = (courseId) => {
     // Remove course
     return Course.remove({ _id: courseId })
-        .then(({ _id }) => User.updateMany({}, { "$pull": { courses: courseId }}))
+        .then(({ _id }) => User.updateMany({}, { "$pull": { courses: courseId } }))
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -196,33 +199,44 @@ const removeCourse = (courseId) => {
 // Edit course
 const editCourse = (course) => {
     // Edit course
-    return Course.findOneAndUpdate({ _id: course._id }, { $set: { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: [] } })
-        .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
-
-            }
-            return course._id
+    return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: [] } })
+        .then(({_id, dept, name, number, section, description, unit, prof, room, assignments}) => {
+            return {_id, dept, name, number, section, description, unit, prof, room, assignments}
         })
 }
 
 // Post assignment
-const postAssignment = (course, assignment) => {
-    return Course.findOneAndUpdate({ _id: course._id }, { "$push": { assignments: assignment } })
+const postAssignment = (courseId, assignment) => {
+    // Return an assignment object if assignment is not in db
+    return findAssignment(courseId, assignment)
         .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
+            // Check if assignment is taken already
+            if (found) {
+                throw new Error('Assignment already exists')
             }
 
-            return { course: course, assignment: assignment }
+            // Return an object if assignment doesnt exist
+            return {
+                title: assignment.title,
+                description: assignment.description
+            }
+        })
+        // Create assignment from assignment object 
+        .then(assignment => Assignment.create(assignment))
+        .then(({_id, title, description}) => {
+            const assignment = {_id, title, description}
+            Course.findOneAndUpdate({ _id: courseId}, { '$push': { assignments: assignment._id } })
+
+            return {courseId, _id, title, description}
         })
 }
+
 
 // Remove assignment
 const removeAssignment = (course, assignment) => {
     // Remove course
     return Course.update({ _id: course._id }, { '$pull': { assignments: assignment } })
-        .then 
+        .then
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -235,7 +249,7 @@ const removeAssignment = (course, assignment) => {
 
 // Edit assignment
 const editAssignment = (course, assignment) => {
-    return Course.findOneAndUpdate({ _id: course._id }, { "$pull": { assignments: assignment} })
+    return Course.findOneAndUpdate({ _id: course._id }, { "$pull": { assignments: assignment } })
         .then(found => {
             if (!found) {
                 throw new Error('Course does not exist')
@@ -244,9 +258,9 @@ const editAssignment = (course, assignment) => {
             return { course: course, assignment: assignment }
         })
         .then(obj => {
-            Course.findOneAndUpdate({ _id: obj.course._id }, { "$push": { assignments: obj.assignment} })
+            Course.findOneAndUpdate({ _id: obj.course._id }, { "$push": { assignments: obj.assignment } })
 
-            return
+            return { course: course, assignment: assignment }
         })
 }
 

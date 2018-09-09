@@ -40,8 +40,10 @@
                 <button v-show="state === 'Home'" v-on:click="changeState('Home')" class="btn btn-danger" type="submit">Home</button>
                 <button v-show="state !== 'Courses'" v-on:click="changeState('Courses')" class="btn btn-primary" type="submit">Courses</button>
                 <button v-show="state === 'Courses'" v-on:click="changeState('Courses')" class="btn btn-danger" type="submit">Courses</button>
-                <button v-show="state !== 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-primary" type="submit">Assignments</button>
-                <button v-show="state === 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-danger" type="submit">Assignments</button>
+                <button v-show="state !== 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-primary"
+                    type="submit">Assignments</button>
+                <button v-show="state === 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-danger"
+                    type="submit">Assignments</button>
                 <button v-show="state !== 'Forums'" v-on:click="changeState('Forums')" class="btn btn-primary" type="submit">Forums</button>
                 <button v-show="state === 'Forums'" v-on:click="changeState('Forums')" class="btn btn-danger" type="submit">Forums</button>
             </div>
@@ -67,16 +69,16 @@
             <div class="col s2">
                 <div class="course-list">
                     <h4 align="center">Current Courses</h4>
-                    <hr/>
+                    <hr />
                     <ul v-for="courseId in me.courses">
                         <template v-for="courseObj in courses">
                             <li v-show="courseId === courseObj._id">
                                 <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}</p>
                                 <p>{{courseObj.name}}</p>
                                 <p>{{courseObj.prof}} {{courseObj.room}}</p>
-                            </li>    
+                            </li>
                         </template>
-                        <hr/>
+                        <hr />
                     </ul>
                 </div>
             </div>
@@ -168,7 +170,7 @@
                         <button v-on:click="dropCourse(courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
                     </li>
                 </template>
-                <hr/>
+                <hr />
             </ul>
         </div>
 
@@ -210,33 +212,38 @@
             </div>
         </div>
 
-        <!-- Assignments Page -->
+        <!-- Assignments Page for Professors -->
         <div v-show="loggedIn && state === 'Assignments' && !addingAssignment && !edittingAssignment">
             <ul v-for="course in courses">
                 <li v-show="course.prof === me.name">
                     <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
                             class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                    <ul v-for="assignment in course.assignments">
-                        <li>
-                            <p>{{assignment.title}}
-                                <button v-on:click="selectAssignmentToEdit(course, assignment)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
-                                <button v-on:click="removeAssignment(course, assignment)" class="btn-small waves-effect waves-light" type="submit">Remove</button>
-                            </p>
-                        </li>
-                    </ul>
+                    <!-- <ul v-for="assignment in assignments">
+                        <template v-for="course in courses">
+                            <li v-show="assignment._id === assignmentId">
+                                <p>{{assignment.title}}
+                                    <button v-on:click="selectAssignmentToEdit(assignment._id)" class="btn-small waves-effect waves-light"
+                                        type="submit">Edit</button>
+                                    <button v-on:click="removeAssignment(assignment._id)" class="btn-small waves-effect waves-light"
+                                        type="submit">Remove</button>
+                                </p>
+                            </li>
+                        </template>
+                    </ul> -->
                 </li>
-                <hr/>
+                <hr />
             </ul>
         </div>
 
         <!-- Adding assignments -->
         <div v-show="loggedIn && state === 'Assignments' && addingAssignment">
-            <h1>Adding assignment to {{assignmentOfCourseToEdit.dept}}{{assignmentOfCourseToEdit.number}}-{{assignmentOfCourseToEdit.section}}
+            <h1>Adding assignment to
+                {{assignmentOfCourseToEdit.dept}}{{assignmentOfCourseToEdit.number}}-{{assignmentOfCourseToEdit.section}}
                 {{assignmentOfCourseToEdit.name}}
             </h1>
             <input v-model="assignmentTitle" placeholder="title of assignment" type="text">
             <textarea v-model="assignmentDescription" placeholder="description of assigment"></textarea>
-            <button v-on:click="postAssignment(assignmentOfCourseToEdit, assignmentTitle, assignmentDescription)" class="btn-small waves-effect waves-light"
+            <button v-on:click="postAssignment(assignmentOfCourseToEdit._id, assignmentTitle, assignmentDescription)" class="btn-small waves-effect waves-light"
                 type="submit">Post</button>
         </div>
 
@@ -244,7 +251,8 @@
         <div v-show="loggedIn && state === 'Assignments' && edittingAssignment">
             <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
             <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
-            <button v-on:click="editAssignment(courseOfAssignmentToEdit, newAssignment)" class="btn-small waves-effect waves-light" type="submit">Submit
+            <button v-on:click="editAssignment(courseOfAssignmentToEdit, newAssignment)" class="btn-small waves-effect waves-light"
+                type="submit">Submit
                 Changes</button>
         </div>
     </div>

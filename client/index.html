@@ -218,20 +218,21 @@
                 <li v-show="course.prof === me.name">
                     <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
                             class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                    <!-- <ul v-for="assignment in assignments">
-                        <template v-for="course in courses">
+                    <!-- Assignments for each course -->
+                    <ul v-for="assignment in assignments">
+                        <template v-for="assignmentId in course.assignments">
                             <li v-show="assignment._id === assignmentId">
                                 <p>{{assignment.title}}
-                                    <button v-on:click="selectAssignmentToEdit(assignment._id)" class="btn-small waves-effect waves-light"
+                                    <button v-on:click="selectAssignmentToEdit(assignment)" class="btn-small waves-effect waves-light"
                                         type="submit">Edit</button>
-                                    <button v-on:click="removeAssignment(assignment._id)" class="btn-small waves-effect waves-light"
+                                    <button v-on:click="removeAssignment(course._id, assignment)" class="btn-small waves-effect waves-light"
                                         type="submit">Remove</button>
                                 </p>
                             </li>
                         </template>
-                    </ul> -->
+                    </ul>
                 </li>
-                <hr />
+                <hr/>
             </ul>
         </div>
 
@@ -251,7 +252,7 @@
         <div v-show="loggedIn && state === 'Assignments' && edittingAssignment">
             <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
             <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
-            <button v-on:click="editAssignment(courseOfAssignmentToEdit, newAssignment)" class="btn-small waves-effect waves-light"
+            <button v-on:click="editAssignment(newAssignment)" class="btn-small waves-effect waves-light"
                 type="submit">Submit
                 Changes</button>
         </div>

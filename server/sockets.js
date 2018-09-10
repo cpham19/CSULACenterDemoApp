@@ -47,8 +47,6 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-add-course', { dept: courseDept }))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
 
         socket.on('enroll-course', (userName, courseId) => {
@@ -82,9 +80,6 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-remove-course', 'Failed to remove course'))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
-            db.listOfys().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
         socket.on('edit-course', (course) => {
@@ -96,8 +91,6 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-edit-course', 'Failed to edit course'))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         })
 
         socket.on('post-assignment', (courseId, assignment) => {
@@ -109,36 +102,28 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-post-assignment', 'Failed to post assignment'))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
-            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
-        socket.on('remove-assignment', (course, assignment) => {
+        socket.on('remove-assignment', (courseId, assignment) => {
             // remove course
-            db.removeAssignment(course, assignment)
+            db.removeAssignment(courseId, assignment)
                 // success
                 .then(removed =>
                     io.emit('successful-remove-assignment', removed)
                 )
                 // error
                 .catch(err => io.emit('failed-remove-assignment', 'Failed to remove assignment'))
-
-            db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
-            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
 
-        socket.on('edit-assignment', (course, assignment) => {
+        socket.on('edit-assignment', (assignment) => {
             // Edit assignment
-            db.editAssignment(course, assignment)
+            db.editAssignment(assignment)
                 // success
                 .then(obj =>
                     io.emit('successful-edit-assignment', obj)
                 )
                 // error
                 .catch(err => io.emit('failed-edit-assignment', 'Failed to edit assignment'))
-                
-            db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         })
     })
 }

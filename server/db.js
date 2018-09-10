@@ -59,7 +59,7 @@ const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName
 const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: course.dept, number: course.num, section: course.section })
 
 // Used to check if an assignment exists already 
-const findAssignment = (courseId, assignment) => Assignment.findOne({ title: assignment.title, description: assignment.description })
+const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title, description: assignment.description })
 
 
 // Validating user for logging in
@@ -200,15 +200,15 @@ const removeCourse = (courseId) => {
 const editCourse = (course) => {
     // Edit course
     return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room, assignments: [] } })
-        .then(({_id, dept, name, number, section, description, unit, prof, room, assignments}) => {
-            return {_id, dept, name, number, section, description, unit, prof, room, assignments}
+        .then(({ _id, dept, name, number, section, description, unit, prof, room, assignments }) => {
+            return { _id, dept, name, number, section, description, unit, prof, room, assignments }
         })
 }
 
 // Post assignment
 const postAssignment = (courseId, assignment) => {
     // Return an assignment object if assignment is not in db
-    return findAssignment(courseId, assignment)
+    return findAssignment(assignment)
         .then(found => {
             // Check if assignment is taken already
             if (found) {
@@ -223,44 +223,30 @@ const postAssignment = (courseId, assignment) => {
         })
         // Create assignment from assignment object 
         .then(assignment => Assignment.create(assignment))
-        .then(({_id, title, description}) => {
-            const assignment = {_id, title, description}
-            Course.findOneAndUpdate({ _id: courseId}, { '$push': { assignments: assignment._id } })
-
-            return {courseId, _id, title, description}
+        // Find the course and push the new assignment to the assignments array
+        .then(({id}) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { assignments: id} }))
+        .then((obj) => findAssignment(assignment))
+        .then(({ _id, title, description }) => {
+            return { courseId, _id, title, description }
         })
 }
 
 
 // Remove assignment
-const removeAssignment = (course, assignment) => {
-    // Remove course
-    return Course.update({ _id: course._id }, { '$pull': { assignments: assignment } })
-        .then
-        .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
-            }
-
-            return { course: course, assignment: assignment }
+const removeAssignment = (courseId, assignment) => {
+    return Assignment.remove(assignment)
+        .then((obj)=> Course.findOneAndUpdate({ _id: courseId }, { '$pull': { assignments: assignment._id }}))
+        .then(obj => {
+            return {courseId: courseId, assignmentId: assignment._id}
         })
 }
 
 
 // Edit assignment
-const editAssignment = (course, assignment) => {
-    return Course.findOneAndUpdate({ _id: course._id }, { "$pull": { assignments: assignment } })
-        .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
-            }
-
-            return { course: course, assignment: assignment }
-        })
-        .then(obj => {
-            Course.findOneAndUpdate({ _id: obj.course._id }, { "$push": { assignments: obj.assignment } })
-
-            return { course: course, assignment: assignment }
+const editAssignment = (assignment) => {
+    return Assignment.findOneAndUpdate({ _id: assignment._id }, { "$set": { title: assignment.title, description: assignment.description } })
+        .then(({ _id, title, description }) => {
+            return { _id, title, description }
         })
 }
 

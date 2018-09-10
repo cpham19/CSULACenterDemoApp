@@ -184,25 +184,23 @@ const app = new Vue({
                 return
             }
 
-            this.addingAssignment = false
-            this.assignmentOfCourseToEdit = ''
-
             const assignment = { title: assignmentTitle, description: assignmentDescription }
             socket.emit('post-assignment', courseId, assignment)
         },
-        removeAssignment: function (course, assignment) {
-            socket.emit('remove-assignment', course, assignment)
+        removeAssignment: function (courseId, assignment) {
+            socket.emit('remove-assignment', courseId, assignment)
         },
-        selectAssignmentToEdit: function (course, assignment) {
+        selectAssignmentToEdit: function (assignment) {
             this.addingAssignment = false
             this.edittingAssignment = true
             this.newAssignment = assignment
-            this.courseOfAssignmentToEdit = course
         },
-        editAssignment: function (course, assignment) {
-            this.addingAssignment = false
-            this.edittingAssignment = false
-            socket.emit('edit-assignment', course, assignment)
+        editAssignment: function (assignment) {
+            if (!assignment.title || !assignment.description) {
+                return
+            }
+
+            socket.emit('edit-assignment', assignment)
         }
     },
     components: {
@@ -233,9 +231,9 @@ socket.on('successful-join', user => {
         app.loggedIn = true
         app.failed = ''
         app.password = ''
-    }
 
-    app.users.push(user)
+        app.users.push(user)
+    }
 })
 
 // Failed to join because username exists
@@ -257,8 +255,11 @@ socket.on('successful-add-course', courseObj => {
         app.courseProf = ''
         app.courseRoom = ''
         app.courses.push(courseObj)
+
+        this.addingAssignment = false
+        this.assignmentOfCourseToEdit = ''
+        console.log("ADDED THE COURSE: " + courseObj._id)
     }
-    console.log("ADDED THE COURSE: " + courseObj._id)
 })
 
 // Added course
@@ -268,24 +269,27 @@ socket.on('successful-enroll-course', courseId => {
 
         // Filter the search results after enrolling a course
         app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj._id === courseId))
+
+        console.log("DROPPED THE COURSE: " + courseId)
     }
-    console.log("DROPPED THE COURSE: " + courseId)
 })
 
 // Dropped course
 socket.on('successful-drop-course', courseId => {
     if (app.userName === app.me.name) {
         app.me.courses = app.me.courses.filter(courseObj => !(courseObj === courseId))
+
+        console.log("DROPPED THE COURSE: " + courseId)
     }
-    console.log("DROPPED THE COURSE: " + courseId)
 })
 
 // Remove course
 socket.on('successful-remove-course', courseId => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.filter(courseObj => !(courseObj._id === courseId))
+
+        console.log("REMOVED THE COURSE: " + courseId)
     }
-    console.log("REMOVED THE COURSE: " + courseId)
 })
 
 // Edit course
@@ -314,19 +318,29 @@ socket.on('successful-edit-course', course => {
 })
 
 // Edit assignment
-socket.on('successful-edit-assignment', obj => {
+socket.on('successful-edit-assignment', assignment => {
     if (app.userName === app.me.name) {
+        app.assignments = app.assignments.map(assignmentObj => {
+            if (assignmentObj._id === assignment._id) {
+                assignmentObj = assignment
+                return assignmentObj
+            }
+            else {
+                return assignmentObj
+            }
+        })
 
+        app.edittingAssignment = false
+        console.log("EDITTED THE ASSIGNMENT: " + assignment)
     }
-    console.log("EDITTED THE ASSIGNMENT: " + obj.assignment._id)
 })
 
 // Remove assignemnt
 socket.on('successful-remove-assignment', obj => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
-            if (courseObj._id === obj.course._id) {
-                courseObj.assignments = courseObj.assignments.filter(assignment => !(assignment.id === obj.assignment.id))
+            if (courseObj._id === obj.courseId) {
+                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
 
                 return courseObj
             }
@@ -334,28 +348,34 @@ socket.on('successful-remove-assignment', obj => {
                 return courseObj
             }
         })
+
+        app.assignments = app.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
+
+        console.log("REMOVED THE ASSIGNMENT: " + obj.assignmentId + " FROM " + obj.courseId)
     }
-    console.log("REMOVED THE ASSIGNMENT: " + obj.assignment._id)
 })
 
 
 // Posted assignment
 socket.on('successful-post-assignment', obj => {
-    console.log(obj)
-    // if (app.userName === app.me.name) {
-    //     app.courses = app.courses.map(courseObj => {
-    //         if (courseObj._id === obj.courseId) {
-    //             courseObj.assignments.push(obj.assignment._id)
-    //             return courseObj
-    //         }
-    //         else {
-    //             return courseObj
-    //         }
-    //     })
+    if (app.userName === app.me.name) {
+        app.courses = app.courses.map(courseObj => {
+            if (courseObj._id === obj.courseId) {
+                courseObj.assignments.push(obj._id)
+                return courseObj
+            }
+            else {
+                return courseObj
+            }
+        })
 
-    //     app.assignments.push(obj.assignment)
+        const assignment = {_id:obj._id, title: obj.title, description: obj.description}
 
-    //     app.assignmentTitle = ''
-    //     app.assignmentDescription = ''
-    // }
+        app.assignments.push(assignment)
+
+        app.assignmentTitle = ''
+        app.assignmentDescription = ''
+        app.addingAssignment = false
+        console.log("POSTED ASSIGNMENT: " + assignment._id)
+    }
 })

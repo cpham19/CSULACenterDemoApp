@@ -8,6 +8,7 @@ module.exports = (server, db) => {
         db.activeUsers().then(users => socket.emit('refresh-users', users))
         db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
+        db.listOfThreads().then(threads => socket.emit('refresh-threads', threads))
 
         // demo code only for sockets + db
         // in production login/user creation should happen with a POST to https endpoint
@@ -124,6 +125,39 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-edit-assignment', 'Failed to edit assignment'))
+        })
+
+        socket.on('post-thread', (courseId, thread) => {
+            // Post Thread
+            db.postThread(courseId, thread)
+                // success
+                .then(obj =>
+                    io.emit('successful-post-thread', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-post-thread', 'Failed to post thread'))
+        })
+
+        socket.on('remove-thread', (courseId, thread) => {
+            // remove thread
+            db.removeThread(courseId, thread)
+                // success
+                .then(removed =>
+                    io.emit('successful-remove-thread', removed)
+                )
+                // error
+                .catch(err => io.emit('failed-remove-thread', 'Failed to remove thread'))
+        })
+
+        socket.on('edit-thread', (thread) => {
+            // Edit thread
+            db.editThread(thread)
+                // success
+                .then(obj =>
+                    io.emit('successful-edit-thread', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-edit-thread', 'Failed to edit thread'))
         })
     })
 }

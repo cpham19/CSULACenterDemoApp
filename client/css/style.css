@@ -182,3 +182,15 @@ hr {
     cursor: pointer;
     text-align: center;
 }
+
+/* Assignments Buttons */
+.button-align-right {
+    background-color: #4CAF50;
+    border: 1px solid black;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    float: right;
+    font-size: 16px;
+}

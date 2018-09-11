@@ -223,37 +223,79 @@
                         <template v-for="assignmentId in course.assignments">
                             <li v-show="assignment._id === assignmentId">
                                 <p>{{assignment.title}}
-                                    <button v-on:click="selectAssignmentToEdit(assignment)" class="btn-small waves-effect waves-light"
-                                        type="submit">Edit</button>
-                                    <button v-on:click="removeAssignment(course._id, assignment)" class="btn-small waves-effect waves-light"
+                                    <button v-on:click="removeAssignment(course._id, assignment)" class="button-align-right"
                                         type="submit">Remove</button>
+                                    <button v-on:click="selectAssignmentToEdit(assignment)" class="button-align-right"
+                                        type="submit">Edit</button>
                                 </p>
                             </li>
                         </template>
                     </ul>
                 </li>
-                <hr/>
+                <hr />
             </ul>
         </div>
 
         <!-- Adding assignments -->
         <div v-show="loggedIn && state === 'Assignments' && addingAssignment">
             <h1>Adding assignment to
-                {{assignmentOfCourseToEdit.dept}}{{assignmentOfCourseToEdit.number}}-{{assignmentOfCourseToEdit.section}}
-                {{assignmentOfCourseToEdit.name}}
+                {{assignmentOfCourseToAdd.dept}}{{assignmentOfCourseToAdd.number}}-{{assignmentOfCourseToAdd.section}}
+                {{assignmentOfCourseToAdd.name}}
             </h1>
             <input v-model="assignmentTitle" placeholder="title of assignment" type="text">
             <textarea v-model="assignmentDescription" placeholder="description of assigment"></textarea>
-            <button v-on:click="postAssignment(assignmentOfCourseToEdit._id, assignmentTitle, assignmentDescription)" class="btn-small waves-effect waves-light"
-                type="submit">Post</button>
+            <button v-on:click="postAssignment(assignmentOfCourseToAdd._id, assignmentTitle, assignmentDescription)"
+                class="btn-small waves-effect waves-light" type="submit">Post</button>
         </div>
 
         <!-- Editting assignments -->
         <div v-show="loggedIn && state === 'Assignments' && edittingAssignment">
             <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
             <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
-            <button v-on:click="editAssignment(newAssignment)" class="btn-small waves-effect waves-light"
-                type="submit">Submit
+            <button v-on:click="editAssignment(newAssignment)" class="btn-small waves-effect waves-light" type="submit">Submit
+                Changes</button>
+        </div>
+
+        <!-- Forums page -->
+        <div v-show="loggedIn && state === 'Forums' && !addingThread && !edittingThread">
+            <ul v-for="course in courses">
+                <li v-show="course.prof === me.name">
+                    <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="createThread(course)"
+                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                    <!-- Threads for each course -->
+                    <ul v-for="thread in threads">
+                        <template v-for="threadId in course.threads">
+                            <li v-show="thread._id === threadId">
+                                <p>{{thread.title}} by {{thread.author}}
+                                    <button v-on:click="removeThread(course._id, thread)" class="button-align-right"
+                                        type="submit">Remove</button>
+                                    <button v-on:click="selectThreadToEdit(thread)" class="button-align-right" type="submit">Edit</button>
+                                </p>
+                            </li>
+                        </template>
+                    </ul>
+                </li>
+                <hr />
+            </ul>
+        </div>
+
+        <!-- Adding threads -->
+        <div v-show="loggedIn && state === 'Forums' && addingThread">
+            <h1>Adding thread to
+                {{courseOfThreadToAdd.dept}}{{courseOfThreadToAdd.number}}-{{courseOfThreadToAdd.section}}
+                {{courseOfThreadToAdd.name}}
+            </h1>
+            <input v-model="threadTitle" placeholder="title of thread" type="text">
+            <textarea v-model="threadDescription" placeholder="description of thread"></textarea>
+            <button v-on:click="postThread(courseOfThreadToAdd._id, me.name, threadTitle, threadDescription)" class="btn-small waves-effect waves-light"
+                type="submit">Post</button>
+        </div>
+
+        <!-- Editting threads -->
+        <div v-show="loggedIn && state === 'Forums' && edittingThread">
+            <input v-model="newThread.title" placeholder="title of thread" type="text">
+            <textarea v-model="newThread.description" placeholder="description of thread"></textarea>
+            <button v-on:click="editThread(newThread)" class="btn-small waves-effect waves-light" type="submit">Submit
                 Changes</button>
         </div>
     </div>

@@ -50,19 +50,19 @@ const app = new Vue({
         assignmentOfCourseToAdd: '',
         assignmentTitle: '',
         assignmentDescription: '',
-        newCourse: '',
-        newAssignment: '',
+        newCourse: {},
+        newAssignment: {},
         courseOfAssignmentToEdit: '',
         courseOfThreadToAdd: '',
         threadTitle: '',
         threadDescription: '',
         addingThread: false,
         edittingThread: false,
-        newThread: '',
+        newThread: {},
         viewingAssignment: false,
-        assignmentToView: '',
+        assignmentToView: {},
         viewingThread: false,
-        threadToView: '',
+        threadToView: {},
         newReply: '',
     },
     created: function () {
@@ -223,8 +223,10 @@ const app = new Vue({
             if (!threadTitle || !threadDescription) {
                 return
             }
+            
+            const modifiedAuthor = {name: author.name, avatar: author.avatar}
 
-            const thread = { author: author, title: threadTitle, description: threadDescription }
+            const thread = { author: modifiedAuthor, title: threadTitle, description: threadDescription }
             socket.emit('post-thread', courseId, thread)
         },
         removeThread: function (courseId, thread) {
@@ -248,22 +250,25 @@ const app = new Vue({
         },
         backOutAssignment: function () {
             this.viewingAssignment = false
-            this.assignmentToView = ''
+            this.assignmentToView = {}
         },
         viewThread: function (thread) {
             this.viewingThread = true
             this.threadToView = thread
+            console.log(this.threadToView)
         },
         backOutThread: function () {
             this.viewingThread = false
-            this.threadToView = ''
+            this.threadToView = {}
         },
-        replyToThread: function (threadId, name, newReply) {
+        replyToThread: function (threadId, author, newReply) {
             if (!newReply) {
                 return
             }
 
-            const reply = { threadId: threadId, author: name, description: newReply }
+            const modifiedAuthor = {name: author.name, avatar: author.avatar}
+
+            const reply = { threadId: threadId, author: modifiedAuthor, description: newReply }
             socket.emit('reply-thread', reply)
         }
     },
@@ -457,7 +462,7 @@ socket.on('successful-post-thread', thread => {
         app.threadTitle = ''
         app.threadDescription = ''
         app.addingThread = false
-        app.courseOfThreadToAdd = ''
+        app.courseOfThreadToAdd = {}
 
         console.log("POSTED THREAD: " + thread._id)
     }

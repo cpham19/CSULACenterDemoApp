@@ -3,7 +3,7 @@ const
     Mongoose = require('mongoose'),
     { generateHash, validatePassword } = require('./validate')
 
-Mongoose.connect(config.uri)
+Mongoose.connect(config.uri, { useNewUrlParser: true })
 Mongoose.connection.on('error', err => {
     console.log('MongoDB Connection Error:' + err)
 })
@@ -42,7 +42,7 @@ const AssignmentSchema = new Mongoose.Schema({
 // Schema for Threads
 const ThreadSchema = new Mongoose.Schema({
     courseId: String,
-    author: String,
+    author: Object,
     title: String,
     description: String,
     replies: Array,
@@ -51,7 +51,7 @@ const ThreadSchema = new Mongoose.Schema({
 // Schema for Replies
 const ReplySchema = new Mongoose.Schema({
     threadId: String,
-    author: String,
+    author: Object,
     description: String,
 }, { strict: false })
 
@@ -90,10 +90,10 @@ const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: cour
 const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title })
 
 // Used to check if a thread exists already 
-const findThread = (thread) => Thread.findOne({ title: thread.title })
+const findThread = (thread) => Thread.findOne({ title: thread.title, author: thread.author, description: thread.description})
 
 // Used to check if a reply exists already 
-const findReply = (reply) => Reply.findOne(reply)
+const findReply = (reply) => Reply.findOne({threadId: reply.threadId, author: reply.author, description: reply.description})
 
 
 // Validating user for logging in

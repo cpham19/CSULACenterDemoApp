@@ -194,3 +194,13 @@ hr {
     float: right;
     font-size: 16px;
 }
+
+.thread-info-left {
+    width: 80%;
+    float: left;
+}
+
+.thread-info-right {
+    width: 20%;
+    float: right;
+}

@@ -9,6 +9,7 @@ module.exports = (server, db) => {
         db.listOfCourses().then(courses => socket.emit('refresh-courses', courses))
         db.listOfAssignments().then(assignments => socket.emit('refresh-assignments', assignments))
         db.listOfThreads().then(threads => socket.emit('refresh-threads', threads))
+        db.listOfReplies().then(replies => socket.emit('refresh-replies', replies))
 
         // demo code only for sockets + db
         // in production login/user creation should happen with a POST to https endpoint
@@ -158,6 +159,17 @@ module.exports = (server, db) => {
                 )
                 // error
                 .catch(err => io.emit('failed-edit-thread', 'Failed to edit thread'))
+        })
+
+        socket.on('reply-thread', (reply) => {
+            // Reply to thread
+            db.replyToThread(reply)
+                // success
+                .then(obj =>
+                    io.emit('successful-reply-thread', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-reply-thread', 'Failed to reply to thread'))
         })
     })
 }

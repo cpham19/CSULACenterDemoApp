@@ -34,16 +34,25 @@ const CourseSchema = new Mongoose.Schema({
 
 // Schema for Assignments
 const AssignmentSchema = new Mongoose.Schema({
+    courseId: String,
     title: String,
     description: String,
 }, { strict: false })
 
-// Schema for Forum Posts
+// Schema for Threads
 const ThreadSchema = new Mongoose.Schema({
+    courseId: String,
     author: String,
     title: String,
     description: String,
-    posts: Array
+    replies: Array,
+}, { strict: false })
+
+// Schema for Replies
+const ReplySchema = new Mongoose.Schema({
+    threadId: String,
+    author: String,
+    description: String,
 }, { strict: false })
 
 const User = Mongoose.model('users', UserSchema)
@@ -53,6 +62,8 @@ const Course = Mongoose.model('courses', CourseSchema)
 const Assignment = Mongoose.model('assignments', AssignmentSchema)
 
 const Thread = Mongoose.model('threads', ThreadSchema)
+
+const Reply = Mongoose.model('replies', ReplySchema)
 
 // Array of users
 const activeUsers = () => User.find({ socketId: { $ne: null } }, { password: 0 })
@@ -66,6 +77,9 @@ const listOfAssignments = () => Assignment.find({ title: { $ne: null } })
 // Array of assignments
 const listOfThreads = () => Thread.find({ title: { $ne: null } })
 
+// Array of assignments
+const listOfReplies = () => Reply.find({ description: { $ne: null } })
+
 // Used for validating user for login using regular expression ('Bob' = 'bob')
 const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName}$`, $options: 'i' } })
 
@@ -75,8 +89,11 @@ const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: cour
 // Used to check if an assignment exists already 
 const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title })
 
-// Used to check if a post exists already 
+// Used to check if a thread exists already 
 const findThread = (thread) => Thread.findOne({ title: thread.title })
+
+// Used to check if a reply exists already 
+const findReply = (reply) => Reply.findOne(reply)
 
 
 // Validating user for logging in
@@ -163,59 +180,50 @@ const addCourse = (course) => {
                 unit: course.unit,
                 prof: course.prof,
                 room: course.room,
-                assignments: []
+                assignments: [],
+                threads: []
             }
         })
         // Create course 
-        .then(course => Course.create(course))
-        // Return course dept, name, number, section, and unit
-        .then(({ _id, dept, name, number, section, description, unit, prof, room, assignments }) => {
-            return { _id, dept, name, number, section, description, unit, prof, room, assignments }
+        .then(course => {
+            return Course.create(course)
         })
+    // // Return course dept, name, number, section, and unit
+    // .then(({ _id, dept, name, number, section, description, unit, prof, room, assignments, threads }) => {
+    //     return { _id, dept, name, number, section, description, unit, prof, room, assignments, threads }
+    // })
 }
 
 // Enroll course for user
 const enrollCourse = (userName, courseId) => {
-    // Enroll course
     return User.findOneAndUpdate({ name: userName }, { "$push": { courses: courseId } })
         .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
-            }
-
             return courseId
         })
 }
 
 // Drop course for user
 const dropCourse = (userName, courseId) => {
-    // Drop course
     return User.findOneAndUpdate({ name: userName }, { '$pull': { courses: courseId } })
         .then(found => {
-            if (!found) {
-                throw new Error('Course does not exist')
-            }
             return courseId
         })
 }
 
 // Remove course
 const removeCourse = (courseId) => {
-    // Remove course
     return Course.remove({ _id: courseId })
         .then(obj => User.updateMany({}, { "$pull": { courses: courseId } }))
-        .then(obj=> {
+        .then(obj => Assignment.remove({ courseId: courseId }))
+        .then(obj => Thread.remove({ courseId: courseId }))
+        .then(obj => {
             return courseId
         })
 }
 
 // Edit course
 const editCourse = (course) => {
-    // Edit course
-    return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room} })
-        .then(obj => {
-            return course
-        })
+    return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room } })
 }
 
 // Post assignment
@@ -230,8 +238,10 @@ const postAssignment = (courseId, assignment) => {
 
             // Return an object if assignment doesnt exist
             return {
+                courseId: courseId,
                 title: assignment.title,
-                description: assignment.description
+                description: assignment.description,
+                date: new Date().getTime()
             }
         })
         // Create assignment from assignment object 
@@ -239,7 +249,7 @@ const postAssignment = (courseId, assignment) => {
         // Find the course and push the new assignment to the assignments array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { assignments: id } }))
         .then((obj) => findAssignment(assignment))
-        .then(({ _id, title, description }) => {
+        .then(({ courseId, _id, title, description }) => {
             return { courseId, _id, title, description }
         })
 }
@@ -256,9 +266,6 @@ const removeAssignment = (courseId, assignment) => {
 // Edit assignment
 const editAssignment = (assignment) => {
     return Assignment.findOneAndUpdate({ _id: assignment._id }, { "$set": { title: assignment.title, description: assignment.description } })
-        .then(obj => {
-            return assignment
-        })
 }
 
 // Post Thread
@@ -273,37 +280,57 @@ const postThread = (courseId, thread) => {
 
             // Return an object if post doesnt exist
             return {
+                courseId: courseId,
                 author: thread.author,
                 title: thread.title,
                 description: thread.description,
-                posts: []
+                replies: [],
+                date: new Date().getTime()
             }
         })
         // Create thread from thread object 
         .then(thread => Thread.create(thread))
         // Find the course and push the new thread to the threads array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { threads: id } }))
-        .then((obj) => findThread(thread))
-        .then(({ _id, author, title, description, posts}) => {
-            return { courseId, _id, author, title, description, posts}
-        })
+        .then((obj) => {return findThread(thread)})
 }
 
 // Remove assignment
 const removeThread = (courseId, thread) => {
     return Thread.remove(thread)
-        .then((obj) => Course.findOneAndUpdate({ _id: courseId }, { '$pull': { threads: thread._id } }))
+        .then(obj => Course.findOneAndUpdate({ _id: courseId }, { '$pull': { threads: thread._id } }))
+        .then(obj => Reply.remove({ threadId: thread._id }))
         .then(obj => {
             return { courseId: courseId, threadId: thread._id }
         })
 }
 
-
 // Edit thread
 const editThread = (thread) => {
-    return Thread.findOneAndUpdate({ _id: thread._id }, { "$set": {title: thread.title, description: thread.description} })
+    return Thread.findOneAndUpdate({ _id: thread._id }, { "$set": { title: thread.title, description: thread.description } })
+}
+
+// Reply to thread
+const replyToThread = (reply) => {
+    return findReply(reply)
+        .then(found => {
+            // Check if reply is posted already
+            if (found) {
+                throw new Error('Reply already exists')
+            }
+
+            // Return an object if post doesnt exist
+            return {
+                threadId: reply.threadId,
+                author: reply.author,
+                description: reply.description,
+                date: new Date().getTime()
+            }
+        })
+        .then(reply => Reply.create(reply))
+        .then(({ id }) => Thread.findOneAndUpdate({ _id: reply.threadId }, { '$push': { replies: id } }))
         .then(obj => {
-            return thread
+            return findReply(reply)
         })
 }
 
@@ -325,5 +352,7 @@ module.exports = {
     listOfThreads,
     postThread,
     removeThread,
-    editThread
+    editThread,
+    replyToThread,
+    listOfReplies
 }

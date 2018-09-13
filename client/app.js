@@ -29,6 +29,7 @@ const app = new Vue({
         courses: [],
         assignments: [],
         threads: [],
+        replies: [],
         state: 'Home',
         courseDept: '',
         courseName: '',
@@ -58,6 +59,11 @@ const app = new Vue({
         addingThread: false,
         edittingThread: false,
         newThread: '',
+        viewingAssignment: false,
+        assignmentToView: '',
+        viewingThread: false,
+        threadToView: '',
+        newReply: '',
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -130,7 +136,7 @@ const app = new Vue({
                 return
             }
 
-            const course = {dept: this.courseDept, name: this.courseName, number: this.courseNumber, section: this.courseSection, description: this.courseDescription, unit: this.courseUnit, prof: this.courseProf, room: this.courseRoom}
+            const course = { dept: this.courseDept, name: this.courseName, number: this.courseNumber, section: this.courseSection, description: this.courseDescription, unit: this.courseUnit, prof: this.courseProf, room: this.courseRoom }
 
             socket.emit('add-course', course)
         },
@@ -213,12 +219,12 @@ const app = new Vue({
             this.edittingThreadt = false
             this.courseOfThreadToAdd = course
         },
-        postThread: function(courseId, author, threadTitle, threadDescription) {
+        postThread: function (courseId, author, threadTitle, threadDescription) {
             if (!threadTitle || !threadDescription) {
                 return
             }
 
-            const thread = {author: author, title: threadTitle, description: threadDescription}
+            const thread = { author: author, title: threadTitle, description: threadDescription }
             socket.emit('post-thread', courseId, thread)
         },
         removeThread: function (courseId, thread) {
@@ -236,6 +242,30 @@ const app = new Vue({
 
             socket.emit('edit-thread', thread)
         },
+        viewAssignment: function (assignment) {
+            this.viewingAssignment = true
+            this.assignmentToView = assignment
+        },
+        backOutAssignment: function () {
+            this.viewingAssignment = false
+            this.assignmentToView = ''
+        },
+        viewThread: function (thread) {
+            this.viewingThread = true
+            this.threadToView = thread
+        },
+        backOutThread: function () {
+            this.viewingThread = false
+            this.threadToView = ''
+        },
+        replyToThread: function (threadId, name, newReply) {
+            if (!newReply) {
+                return
+            }
+
+            const reply = { threadId: threadId, author: name, description: newReply }
+            socket.emit('reply-thread', reply)
+        }
     },
     components: {
     }
@@ -261,6 +291,11 @@ socket.on('refresh-assignments', assignments => {
 // Refresh threads
 socket.on('refresh-threads', threads => {
     app.threads = threads
+})
+
+// Refresh replies
+socket.on('refresh-replies', replies => {
+    app.replies = replies
 })
 
 // Successfully join (change screen)
@@ -335,11 +370,9 @@ socket.on('successful-edit-course', course => {
         app.courses = app.courses.map(courseObj => {
             if (courseObj._id === course._id) {
                 courseObj = course
-                return courseObj
             }
-            else {
-                return courseObj
-            }
+
+            return courseObj
         })
 
         app.newCourse.dept = ''
@@ -360,11 +393,9 @@ socket.on('successful-edit-assignment', assignment => {
         app.assignments = app.assignments.map(assignmentObj => {
             if (assignmentObj._id === assignment._id) {
                 assignmentObj = assignment
-                return assignmentObj
             }
-            else {
-                return assignmentObj
-            }
+
+            return assignmentObj
         })
 
         app.edittingAssignment = false
@@ -377,13 +408,10 @@ socket.on('successful-remove-assignment', obj => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
             if (courseObj._id === obj.courseId) {
-                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
+                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === objt.assignmentId))
+            }
 
-                return courseObj
-            }
-            else {
-                return courseObj
-            }
+            return courseObj
         })
 
         app.assignments = app.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
@@ -393,19 +421,15 @@ socket.on('successful-remove-assignment', obj => {
 })
 
 // Posted assignment
-socket.on('successful-post-assignment', obj => {
+socket.on('successful-post-assignment', assignment => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
-            if (courseObj._id === obj.courseId) {
-                courseObj.assignments.push(obj._id)
-                return courseObj
+            if (courseObj._id === assignment.courseId) {
+                courseObj.assignments.push(assignment._id)
             }
-            else {
-                return courseObj
-            }
-        })
 
-        const assignment = {_id:obj._id, title: obj.title, description: obj.description}
+            return courseObj
+        })
 
         app.assignments.push(assignment)
 
@@ -418,19 +442,15 @@ socket.on('successful-post-assignment', obj => {
 })
 
 // Posted forum post
-socket.on('successful-post-thread', obj => {
+socket.on('successful-post-thread', thread => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
-            if (courseObj._id === obj.courseId) {
-                courseObj.threads.push(obj._id)
-                return courseObj
+            if (courseObj._id === thread.courseId) {
+                courseObj.threads.push(thread._id)
             }
-            else {
-                return courseObj
-            }
-        })
 
-        const thread = {_id:obj._id, author: obj.author, title: obj.title, description: obj.description}
+            return courseObj
+        })
 
         app.threads.push(thread)
 
@@ -449,12 +469,9 @@ socket.on('successful-remove-thread', obj => {
         app.courses = app.courses.map(courseObj => {
             if (courseObj._id === obj.courseId) {
                 courseObj.threads = courseObj.threads.filter(threadId => !(threadId === obj.threadId))
+            }
 
-                return courseObj
-            }
-            else {
-                return courseObj
-            }
+            return courseObj
         })
 
         app.threads = app.threads.filter(threadId => !(threadId === obj.threadId))
@@ -470,14 +487,30 @@ socket.on('successful-edit-thread', thread => {
         app.threads = app.threads.map(threadObj => {
             if (threadObj._id === thread._id) {
                 threadObj = thread
-                return threadObj
             }
-            else {
-                return threadObj
-            }
+
+            return threadObj
         })
 
         app.edittingThread = false
         console.log("EDITTED THE Thread: " + thread._id)
+    }
+})
+
+// Posted reply
+socket.on('successful-reply-thread', reply => {
+    if (app.userName === app.me.name) {
+        app.threads = app.threads.map(thread => {
+            if (thread._id === reply.threadId) {
+                thread.replies.push(reply._id)
+            }
+
+            return thread
+        })
+
+        app.replies.push(reply)
+
+        app.newReply = ''
+        console.log("POSTED REPLY: " + reply._id)
     }
 })

@@ -255,7 +255,6 @@ const app = new Vue({
         viewThread: function (thread) {
             this.viewingThread = true
             this.threadToView = thread
-            console.log(this.threadToView)
         },
         backOutThread: function () {
             this.viewingThread = false

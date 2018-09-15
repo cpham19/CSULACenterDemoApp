@@ -42,7 +42,8 @@ const AssignmentSchema = new Mongoose.Schema({
 // Schema for Threads
 const ThreadSchema = new Mongoose.Schema({
     courseId: String,
-    author: Object,
+    authorName: String,
+    authorAvatar: String,
     title: String,
     description: String,
     replies: Array,
@@ -51,7 +52,8 @@ const ThreadSchema = new Mongoose.Schema({
 // Schema for Replies
 const ReplySchema = new Mongoose.Schema({
     threadId: String,
-    author: Object,
+    authorName: String,
+    authorAvatar: String,
     description: String,
 }, { strict: false })
 
@@ -87,13 +89,13 @@ const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName
 const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: course.dept, number: course.num, section: course.section })
 
 // Used to check if an assignment exists already 
-const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title })
+const findAssignment = (courseId, assignment) => Assignment.findOne({courseId: courseId, title: assignment.title, description: assignment.description})
 
 // Used to check if a thread exists already 
-const findThread = (thread) => Thread.findOne({ title: thread.title, author: thread.author, description: thread.description})
+const findThread = (courseId, thread) => Thread.findOne({courseId: courseId, authorName: thread.author.name, title: thread.title, description: thread.description})
 
 // Used to check if a reply exists already 
-const findReply = (reply) => Reply.findOne({threadId: reply.threadId, author: reply.author, description: reply.description})
+const findReply = (reply) => Reply.findOne({threadId: reply.threadId, authorName: reply.author.name, description: reply.description})
 
 
 // Validating user for logging in
@@ -229,7 +231,7 @@ const editCourse = (course) => {
 // Post assignment
 const postAssignment = (courseId, assignment) => {
     // Return an assignment object if assignment is not in db
-    return findAssignment(assignment)
+    return findAssignment(courseId, assignment)
         .then(found => {
             // Check if assignment is taken already
             if (found) {
@@ -271,7 +273,7 @@ const editAssignment = (assignment) => {
 // Post Thread
 const postThread = (courseId, thread) => {
     // Return a thread object if thread is not in db
-    return findThread(thread)
+    return findThread(courseId, thread)
         .then(found => {
             // Check if post is taken already
             if (found) {
@@ -281,7 +283,8 @@ const postThread = (courseId, thread) => {
             // Return an object if post doesnt exist
             return {
                 courseId: courseId,
-                author: thread.author,
+                authorName: thread.author.name,
+                authorAvatar: thread.author.avatar,
                 title: thread.title,
                 description: thread.description,
                 replies: [],
@@ -292,7 +295,7 @@ const postThread = (courseId, thread) => {
         .then(thread => Thread.create(thread))
         // Find the course and push the new thread to the threads array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { threads: id } }))
-        .then((obj) => {return findThread(thread)})
+        .then((obj) => {return findThread(courseId, thread)})
 }
 
 // Remove assignment
@@ -322,7 +325,8 @@ const replyToThread = (reply) => {
             // Return an object if post doesnt exist
             return {
                 threadId: reply.threadId,
-                author: reply.author,
+                authorName: reply.author.name,
+                authorAvatar: reply.author.avatar,
                 description: reply.description,
                 date: new Date().getTime()
             }

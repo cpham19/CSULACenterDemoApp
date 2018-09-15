@@ -40,8 +40,10 @@
                 <button v-show="state === 'Home'" v-on:click="changeState('Home')" class="btn btn-danger" type="submit">Home</button>
                 <button v-show="state !== 'Courses'" v-on:click="changeState('Courses')" class="btn btn-primary" type="submit">Courses</button>
                 <button v-show="state === 'Courses'" v-on:click="changeState('Courses')" class="btn btn-danger" type="submit">Courses</button>
-                <button v-show="state !== 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-primary" type="submit">Assignments</button>
-                <button v-show="state === 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-danger" type="submit">Assignments</button>
+                <button v-show="state !== 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-primary"
+                    type="submit">Assignments</button>
+                <button v-show="state === 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-danger"
+                    type="submit">Assignments</button>
                 <button v-show="state !== 'Forums'" v-on:click="changeState('Forums')" class="btn btn-primary" type="submit">Forums</button>
                 <button v-show="state === 'Forums'" v-on:click="changeState('Forums')" class="btn btn-danger" type="submit">Forums</button>
             </div>
@@ -69,9 +71,10 @@
                     <h4 align="center">Current Courses</h4>
                     <hr />
                     <ul v-for="courseId in me.courses">
-                        <li v-for="courseObj in courses">
-                            <p v-show="courseId === courseObj._id">{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}<br/>                                {{courseObj.name}}
-                                <br/> {{courseObj.prof}} {{courseObj.room}}<br/>
+                        <li v-for="courseObj in courses" v-show="courseId === courseObj._id">
+                            <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}<br />
+                                {{courseObj.name}}<br />
+                                {{courseObj.prof}} {{courseObj.room}}<br />
                             </p>
                         </li>
                         <hr />
@@ -212,33 +215,45 @@
 
         <!-- Assignments Page for Professors -->
         <div v-show="loggedIn && state === 'Assignments' && !addingAssignment && !edittingAssignment && !viewingAssignment">
-            <ul v-for="course in courses">
-                <li v-show="course.prof === me.name">
-                    <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
-                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                    <!-- Assignments for each course -->
-                    <ul v-for="assignment in assignments">
-                        <li v-for="assignmentId in course.assignments">
-                            <p v-show="assignment._id === assignmentId"><button v-on:click="viewAssignment(assignment)" type="submit">{{assignment.title}}</button>
-                                <button v-on:click="removeAssignment(course._id, assignment)" class="button-align-right" type="submit">Remove</button>
-                                <button v-on:click="selectAssignmentToEdit(assignment)" class="button-align-right" type="submit">Edit</button>
-                            </p>
-                        </li>
-                    </ul>
-                </li>
-                <hr />
-            </ul>
+            <template v-for="course in courses">
+                <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
+                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+
+                <table v-show="course.prof === me.name">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="assignment in assignments">
+                            <td v-show="assignment.courseId === course._id">
+                                <a v-on:click="viewAssignment(assignment)">{{assignment.title}}</a>
+                            </td>
+                            <td v-show="assignment.courseId === course._id">
+                                <button v-on:click="selectAssignmentToEdit(assignment)" class="button-align-left" type="submit">Edit</button>
+                                <button v-on:click="removeAssignment(course._id, assignment)" class="button-align-left"
+                                    type="submit">Remove</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
+
         </div>
 
         <!-- Adding assignments -->
         <div v-show="loggedIn && state === 'Assignments' && addingAssignment">
-            <h1>Adding assignment to {{assignmentOfCourseToAdd.dept}}{{assignmentOfCourseToAdd.number}}-{{assignmentOfCourseToAdd.section}}
+            <h1>Adding assignment to
+                {{assignmentOfCourseToAdd.dept}}{{assignmentOfCourseToAdd.number}}-{{assignmentOfCourseToAdd.section}}
                 {{assignmentOfCourseToAdd.name}}
             </h1>
             <input v-model="assignmentTitle" placeholder="title of assignment" type="text">
             <textarea v-model="assignmentDescription" placeholder="description of assigment"></textarea>
-            <button v-on:click="postAssignment(assignmentOfCourseToAdd._id, assignmentTitle, assignmentDescription)" class="btn-small waves-effect waves-light"
-                type="submit">Post</button>
+            <button v-on:click="postAssignment(assignmentOfCourseToAdd._id, assignmentTitle, assignmentDescription)"
+                class="btn-small waves-effect waves-light" type="submit">Post</button>
         </div>
 
         <!-- Editting assignments -->
@@ -252,34 +267,45 @@
 
         <!-- Viewing assignments -->
         <div v-show="loggedIn && state === 'Assignments' && viewingAssignment">
-            <a v-on:click="backOutAssignment()">Back</a>
+            <button v-on:click="backOutAssignment()" type="submit">Back</button>
             <h1>{{assignmentToView.title}}</h1>
             <p>{{assignmentToView.description}}</p>
         </div>
 
         <!-- Forums page -->
         <div v-show="loggedIn && state === 'Forums' && !addingThread && !edittingThread && !viewingThread">
-            <ul v-for="course in courses">
-                <li v-show="course.prof === me.name">
-                    <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="createThread(course)"
-                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                    <!-- Threads for each course -->
-                    <ul v-for="thread in threads">
-                        <li v-for="threadId in course.threads" v-show="thread._id === threadId">
-                            <p><a v-on:click="viewThread(thread)">{{thread.title}}</a>
-                                <button v-on:click="removeThread(course._id, thread)" class="button-align-right" type="submit">Remove</button>
-                                <button v-on:click="selectThreadToEdit(thread)" class="button-align-right" type="submit">Edit</button>
-                            </p>
-                        </li>
-                    </ul>
-                    <hr/>
-                </li>
-            </ul>
+
+            <template v-for="course in courses">
+                <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="createThread(course)"
+                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+
+                <table v-show="course.prof === me.name">
+                    <thead>
+                        <tr>
+                            <th>Thread</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr v-for="thread in threads">
+                            <td v-show="thread.courseId === course._id">
+                                <a v-on:click="viewThread(thread)">{{thread.title}}</a>
+                            </td>
+                            <td v-show="thread.courseId === course._id">
+                                <button v-on:click="selectThreadToEdit(thread)" class="button-align-left" type="submit">Edit</button>
+                                <button v-on:click="removeThread(course._id, thread)" class="button-align-left" type="submit">Remove</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </template>
         </div>
 
         <!-- Adding threads -->
         <div v-show="loggedIn && state === 'Forums' && addingThread">
-            <h1>Adding thread to {{courseOfThreadToAdd.dept}}{{courseOfThreadToAdd.number}}-{{courseOfThreadToAdd.section}}
+            <h1>Adding thread to
+                {{courseOfThreadToAdd.dept}}{{courseOfThreadToAdd.number}}-{{courseOfThreadToAdd.section}}
                 {{courseOfThreadToAdd.name}}
             </h1>
             <input v-model="threadTitle" placeholder="title of thread" type="text">
@@ -292,7 +318,8 @@
         <div v-show="loggedIn && state === 'Forums' && edittingThread">
             <input v-model="newThread.title" placeholder="title of thread" type="text">
             <textarea v-model="newThread.description" placeholder="description of thread"></textarea>
-            <button v-on:click="editThread(newThread)" class="btn-small waves-effect waves-light" type="submit">Submit Changes
+            <button v-on:click="editThread(newThread)" class="btn-small waves-effect waves-light" type="submit">Submit
+                Changes
             </button>
         </div>
 
@@ -300,34 +327,35 @@
         <!-- Viewing threads -->
         <div v-show="loggedIn && state === 'Forums' && viewingThread">
             <button v-on:click="backOutThread()" type="submit">Back</button>
-            <br/>
-            <div class="thread-info-left">
-                <span>{{threadToView.title}}</span>
-                <p>{{threadToView.description}}</p>
-            </div>
+            <br />
+            <br />
 
-            <div class="thread-info-right">
-                {{threadToView.author}}
-            </div>
-            <hr />
+            <strong>{{threadToView.title}}</strong>
+            <br />
 
-            <br/>
-            <br/>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Message</th>
+                        <th>Author</th>
+                    </tr>
+                </thead>
 
-            <!-- Replies for each thread -->
-            <ul v-for="thread in threads">
-                <li v-for="reply in replies" v-show="thread._id === reply.threadId">
-                    <div class="thread-info-left">
-                        <p>{{reply.description}}</p>
-                    </div>
-                    <div class="thread-info-right">
-                        <img :src="reply.author.avatar" width="25px">{{reply.author.name}}
-                    </div>
-                    <hr />
-                    <br/>
-                    <br/>
-                </li>
-            </ul>
+                <tbody>
+                    <!-- First row is the author and his message -->
+                    <tr>
+                        <td class="post">{{threadToView.description}}</td>
+                        <td class="post"><img :src="threadToView.authorAvatar" width="25px">{{threadToView.authorName}}</td>
+                    </tr>
+
+                    <!-- Additional rows for replies and their authors -->
+                    <tr v-for="reply in replies">
+                        <td class="post" v-show="reply.threadId === threadToView._id">{{reply.description}}</td>
+                        <td class="post" v-show="reply.threadId === threadToView._id"><img :src="reply.authorAvatar"
+                                width="25px">{{reply.authorName}}</td>
+                    </tr>
+                </tbody>
+            </table>
 
             <br />
 

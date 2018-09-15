@@ -184,14 +184,14 @@ hr {
 }
 
 /* Assignments Buttons */
-.button-align-right {
+.button-align-left {
     background-color: #4CAF50;
     border: 1px solid black;
     color: white;
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    float: right;
+    float: left;
     font-size: 16px;
 }
 
@@ -203,4 +203,21 @@ hr {
 .thread-info-right {
     width: 20%;
     float: right;
+}
+
+.strong {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: bold;
+    font-size: 17px;
+}
+
+.table, th, td{
+    border: 1px solid black;
+}
+
+.post {
+    border: 1px solid black;
+    vertical-align: top;
+    text-align: left;
+    height: 100px; 
 }

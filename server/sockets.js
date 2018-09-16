@@ -106,9 +106,9 @@ module.exports = (server, db) => {
                 .catch(err => io.emit('failed-post-assignment', 'Failed to post assignment'))
         })
 
-        socket.on('remove-assignment', (courseId, assignment) => {
+        socket.on('remove-assignment', (assignment) => {
             // remove course
-            db.removeAssignment(courseId, assignment)
+            db.removeAssignment(assignment)
                 // success
                 .then(removed =>
                     io.emit('successful-remove-assignment', removed)
@@ -139,9 +139,9 @@ module.exports = (server, db) => {
                 .catch(err => io.emit('failed-post-thread', 'Failed to post thread'))
         })
 
-        socket.on('remove-thread', (courseId, thread) => {
+        socket.on('remove-thread', (thread) => {
             // remove thread
-            db.removeThread(courseId, thread)
+            db.removeThread(thread)
                 // success
                 .then(removed =>
                     io.emit('successful-remove-thread', removed)

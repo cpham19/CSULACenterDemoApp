@@ -207,8 +207,8 @@ const app = new Vue({
             const assignment = { title: assignmentTitle, description: assignmentDescription }
             socket.emit('post-assignment', courseId, assignment)
         },
-        removeAssignment: function (courseId, assignment) {
-            socket.emit('remove-assignment', courseId, assignment)
+        removeAssignment: function (assignment) {
+            socket.emit('remove-assignment', assignment)
         },
         selectAssignmentToEdit: function (assignment) {
             this.addingAssignment = false
@@ -237,8 +237,8 @@ const app = new Vue({
             const thread = { author: modifiedAuthor, title: threadTitle, description: threadDescription }
             socket.emit('post-thread', courseId, thread)
         },
-        removeThread: function (courseId, thread) {
-            socket.emit('remove-thread', courseId, thread)
+        removeThread: function (thread) {
+            socket.emit('remove-thread', thread)
         },
         selectThreadToEdit: function (thread) {
             this.addingThread = false
@@ -426,19 +426,19 @@ socket.on('successful-edit-assignment', assignment => {
 })
 
 // Remove assignemnt
-socket.on('successful-remove-assignment', obj => {
+socket.on('successful-remove-assignment', assignment => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
-            if (courseObj._id === obj.courseId) {
-                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
+            if (courseObj._id === assignment.courseId) {
+                courseObj.assignments = courseObj.assignments.filter(assignmentObj => !(assignmentObj._id === assignment._id))
             }
 
             return courseObj
         })
 
-        app.assignments = app.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
+        app.assignments = app.assignments.filter(assignmentObj=> !(assignmentObj._id === assignment._id))
 
-        console.log("REMOVED THE ASSIGNMENT: " + obj.assignmentId)
+        console.log("REMOVED THE ASSIGNMENT: " + assignment._id)
     }
 })
 
@@ -455,6 +455,8 @@ socket.on('successful-post-assignment', assignment => {
 
         app.assignments.push(assignment)
 
+        app.assignmentTitle = ''
+        app.assignmentDescription = ''
         app.assignmentOfCourseToAdd.title = ''
         app.assignmentOfCourseToAdd.description = ''
         app.addingAssignment = false
@@ -487,19 +489,20 @@ socket.on('successful-post-thread', thread => {
 })
 
 // Remove thread
-socket.on('successful-remove-thread', obj => {
+socket.on('successful-remove-thread', thread => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
-            if (courseObj._id === obj.courseId) {
-                courseObj.threads = courseObj.threads.filter(threadId => !(threadId === obj.threadId))
+            if (courseObj._id === thread.courseId) {
+                courseObj.threads = courseObj.threads.filter(threadId => !(threadId === thread._id))
             }
 
             return courseObj
         })
 
-        app.threads = app.threads.filter(threadId => !(threadId === obj.threadId))
+        app.threads = app.threads.filter(threadObj => !(threadObj._id === thread._id))
 
-        console.log("REMOVED THE THREAD: " + obj.threadId)
+
+        console.log("REMOVED THE THREAD: " + thread._id)
     }
 })
 

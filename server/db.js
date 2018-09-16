@@ -257,11 +257,11 @@ const postAssignment = (courseId, assignment) => {
 }
 
 // Remove assignment
-const removeAssignment = (courseId, assignment) => {
+const removeAssignment = (assignment) => {
     return Assignment.remove(assignment)
-        .then((obj) => Course.findOneAndUpdate({ _id: courseId }, { '$pull': { assignments: assignment._id } }))
+        .then((obj) => Course.findOneAndUpdate({ _id: assignment.courseId }, { '$pull': { assignments: assignment._id } }))
         .then(obj => {
-            return { courseId: courseId, assignmentId: assignment._id }
+            return assignment
         })
 }
 
@@ -302,12 +302,12 @@ const postThread = (courseId, thread) => {
 }
 
 // Remove assignment
-const removeThread = (courseId, thread) => {
+const removeThread = (thread) => {
     return Thread.remove(thread)
-        .then(obj => Course.findOneAndUpdate({ _id: courseId }, { '$pull': { threads: thread._id } }))
+        .then(obj => Course.findOneAndUpdate({ _id: thread.courseId }, { '$pull': { threads: thread._id } }))
         .then(obj => Reply.remove({ threadId: thread._id }))
         .then(obj => {
-            return { courseId: courseId, threadId: thread._id }
+            return thread
         })
 }
 

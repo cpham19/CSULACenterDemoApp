@@ -64,6 +64,8 @@ const app = new Vue({
         viewingThread: false,
         threadToView: {},
         newReply: '',
+        edittingReply: false,
+        replyToEdit: {},
     },
     created: function () {
         // Unload resources after closing tab or browser
@@ -142,7 +144,6 @@ const app = new Vue({
         },
         searchCourse: function () {
             // If courseDept is empty, do nothing
-            // If both are empty, do nothing
             if (!this.courseDept || (!this.courseDept && !this.courseNumber)) {
                 return
             }
@@ -152,7 +153,14 @@ const app = new Vue({
             // Filter the complete list of courses in database
             // If user only selected a department OR
             // If user selected a department and typed a course number
-            this.searchedCourses = this.courses.filter(course => (course.dept === this.courseDept && !this.courseNumber) || (course.dept === this.courseDept && course.number == this.courseNumber))
+            this.searchedCourses = this.courses.filter(course => {
+                if (course.dept === this.courseDept && !this.courseNumber) {
+                    return course
+                }
+                else if (course.dept === this.courseDept && course.number.toString().includes(this.courseNumber.toString())) {
+                    return course
+                }
+            })
 
             // Filter the search results based on the user's enrolled courses
             this.me.courses.forEach(courseId => {
@@ -223,8 +231,8 @@ const app = new Vue({
             if (!threadTitle || !threadDescription) {
                 return
             }
-            
-            const modifiedAuthor = {name: author.name, avatar: author.avatar}
+
+            const modifiedAuthor = { name: author.name, avatar: author.avatar }
 
             const thread = { author: modifiedAuthor, title: threadTitle, description: threadDescription }
             socket.emit('post-thread', courseId, thread)
@@ -265,10 +273,20 @@ const app = new Vue({
                 return
             }
 
-            const modifiedAuthor = {name: author.name, avatar: author.avatar}
+            const modifiedAuthor = { name: author.name, avatar: author.avatar }
 
             const reply = { threadId: threadId, author: modifiedAuthor, description: newReply }
             socket.emit('reply-thread', reply)
+        },
+        editReply: function (reply) {
+            this.edittingReply = true
+            this.replyToEdit = reply
+        },
+        postEdittedReply: function (reply) {
+            socket.emit('edit-reply', reply)
+        },
+        deleteReply: function (reply) {
+            socket.emit('delete-reply', reply)
         }
     },
     components: {
@@ -412,7 +430,7 @@ socket.on('successful-remove-assignment', obj => {
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
             if (courseObj._id === obj.courseId) {
-                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === objt.assignmentId))
+                courseObj.assignments = courseObj.assignments.filter(assignmentId => !(assignmentId === obj.assignmentId))
             }
 
             return courseObj
@@ -447,6 +465,7 @@ socket.on('successful-post-assignment', assignment => {
 
 // Posted forum post
 socket.on('successful-post-thread', thread => {
+    console.log(thread)
     if (app.userName === app.me.name) {
         app.courses = app.courses.map(courseObj => {
             if (courseObj._id === thread.courseId) {
@@ -503,6 +522,7 @@ socket.on('successful-edit-thread', thread => {
 
 // Posted reply
 socket.on('successful-reply-thread', reply => {
+    console.log(reply)
     if (app.userName === app.me.name) {
         app.threads = app.threads.map(thread => {
             if (thread._id === reply.threadId) {
@@ -516,5 +536,39 @@ socket.on('successful-reply-thread', reply => {
 
         app.newReply = ''
         console.log("POSTED REPLY: " + reply._id)
+    }
+})
+
+// Delete reply
+socket.on('successful-delete-reply', reply => {
+    if (app.userName === app.me.name) {
+        app.threads = app.threads.map(threadObj => {
+            if (threadObj._id === reply.threadId) {
+                threadObj.replies = threadObj.replies.filter(replyObj => !(replyObj._id === reply._id))
+            }
+
+            return threadObj
+        })
+
+        app.replies = app.replies.filter(replyObj => !(replyObj._id === reply._id))
+
+        console.log("REMOVED THE REPLY: " + reply._id)
+    }
+})
+
+// Edit reply
+socket.on('successful-edit-reply', reply => {
+    console.log(reply)
+    if (app.userName === app.me.name) {
+        app.replies = app.replies.map(replyObj => {
+            if (replyObj._id === reply._id) {
+                replyObj = reply
+            }
+
+            return replyObj
+        })
+
+        app.edittingReply = false
+        console.log("EDITTED THE REPLY: " + reply._id)
     }
 })

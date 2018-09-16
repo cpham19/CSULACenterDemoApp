@@ -221,3 +221,8 @@ hr {
     text-align: left;
     height: 100px; 
 }
+
+.login {
+    margin-bottom: 2.6rem;
+    position: relative;  
+  }

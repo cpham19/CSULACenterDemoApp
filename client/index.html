@@ -52,6 +52,7 @@
         <!-- login screen -->
         <div v-show="!loggedIn">
             <img src="img/csula-logo.png" class="center" width="300px">
+
             <input v-model="userName" placeholder="name" type="text" class="u-full-width">
             <input v-model="password" placeholder="password" type="password" class="u-full-width">
             <button v-on:click="joinUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Login</button>
@@ -108,7 +109,7 @@
 
         <!-- For Searching Courses -->
         <div v-show="loggedIn && state === 'Courses' && search">
-            <select class="browser-default" v-model="courseDept">
+            <select class="browser-default" v-model="courseDept" v-on:click="searchCourse()">
                 <option disabled value="">course dept</option>
                 <option>CS</option>
                 <option>ME</option>
@@ -118,8 +119,8 @@
                 <option>COMM</option>
                 <option>CE</option>
             </select>
-            <input v-model="courseNumber" placeholder="course number" type="text">
-            <button v-on:click="searchCourse()" class="btn-small waves-effect waves-light" type="submit">Search</button>
+            <input type="text" v-model="courseNumber" placeholder="course number" @keyup="searchCourse()">
+
             <br />
             <hr />
         </div>
@@ -215,33 +216,24 @@
 
         <!-- Assignments Page for Professors -->
         <div v-show="loggedIn && state === 'Assignments' && !addingAssignment && !edittingAssignment && !viewingAssignment">
-            <template v-for="course in courses">
-                <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
-                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-
-                <table v-show="course.prof === me.name">
-                    <thead>
-                        <tr>
-                            <th>Assignment</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr v-for="assignment in assignments">
-                            <td v-show="assignment.courseId === course._id">
+            <ul v-for="course in courses">
+                <li v-show="course.prof === me.name">
+                    <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="addAssignment(course)"
+                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                    <!-- Assignments for each course -->
+                    <ul v-for="assignment in assignments">
+                        <template v-for="assignmentId in course.assignments">
+                            <li v-show="assignment._id === assignmentId">
                                 <a v-on:click="viewAssignment(assignment)">{{assignment.title}}</a>
-                            </td>
-                            <td v-show="assignment.courseId === course._id">
-                                <button v-on:click="selectAssignmentToEdit(assignment)" class="button-align-left" type="submit">Edit</button>
-                                <button v-on:click="removeAssignment(course._id, assignment)" class="button-align-left"
+                                <button v-on:click="removeAssignment(course._id, assignment)" class="button-align-right"
                                     type="submit">Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </template>
-
+                                <button v-on:click="selectAssignmentToEdit(assignment)" class="button-align-right" type="submit">Edit</button>
+                            </li>
+                        </template>
+                    </ul>
+                </li>
+                <hr />
+            </ul>
         </div>
 
         <!-- Adding assignments -->
@@ -275,31 +267,22 @@
         <!-- Forums page -->
         <div v-show="loggedIn && state === 'Forums' && !addingThread && !edittingThread && !viewingThread">
 
-            <template v-for="course in courses">
-                <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="createThread(course)"
-                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-
-                <table v-show="course.prof === me.name">
-                    <thead>
-                        <tr>
-                            <th>Thread</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <tr v-for="thread in threads">
-                            <td v-show="thread.courseId === course._id">
-                                <a v-on:click="viewThread(thread)">{{thread.title}}</a>
-                            </td>
-                            <td v-show="thread.courseId === course._id">
-                                <button v-on:click="selectThreadToEdit(thread)" class="button-align-left" type="submit">Edit</button>
-                                <button v-on:click="removeThread(course._id, thread)" class="button-align-left" type="submit">Remove</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </template>
+            <ul v-for="course in courses">
+                <li v-show="course.prof === me.name">
+                    <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="createThread(course)"
+                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                    <!-- Threads for each course -->
+                    <ul v-for="thread in threads">
+                        <li v-for="threadId in course.threads" v-show="thread._id === threadId">
+                            <p><a v-on:click="viewThread(thread)">{{thread.title}}</a>
+                                <button v-on:click="removeThread(course._id, thread)" class="button-align-right" type="submit">Remove</button>
+                                <button v-on:click="selectThreadToEdit(thread)" class="button-align-right" type="submit">Edit</button>
+                            </p>
+                        </li>
+                    </ul>
+                    <hr />
+                </li>
+            </ul>
         </div>
 
         <!-- Adding threads -->
@@ -350,9 +333,18 @@
 
                     <!-- Additional rows for replies and their authors -->
                     <tr v-for="reply in replies">
-                        <td class="post" v-show="reply.threadId === threadToView._id">{{reply.description}}</td>
-                        <td class="post" v-show="reply.threadId === threadToView._id"><img :src="reply.authorAvatar"
-                                width="25px">{{reply.authorName}}</td>
+                        <td class="post" v-show="reply.threadId === threadToView._id && replyToEdit._id === reply._id && edittingReply">
+                            <textarea v-model="replyToEdit.description" placeholder="description of reply"></textarea>
+                            <button v-on:click="postEdittedReply(replyToEdit)" class="btn-small waves-effect waves-light"
+                                type="submit">Submit Changes</button>
+                        </td>
+
+                        <td class="post" v-show="reply.threadId === threadToView._id && !edittingReply">{{reply.description}}</td>
+                        <td class="post" v-show="reply.threadId === threadToView._id">
+                            <img :src="reply.authorAvatar" width="25px">{{reply.authorName}}<br />
+                            <button v-on:click="editReply(reply)" class="btn-small waves-effect waves-light" type="submit" v-show="!edittingReply">Edit</button>
+                            <button v-on:click="deleteReply(reply)" class="btn-small waves-effect waves-light" type="submit" v-show="!edittingReply">Delete</button>
+                        </td>
                     </tr>
                 </tbody>
             </table>

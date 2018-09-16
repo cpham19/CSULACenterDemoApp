@@ -171,5 +171,27 @@ module.exports = (server, db) => {
                 // error
                 .catch(err => io.emit('failed-reply-thread', 'Failed to reply to thread'))
         })
+
+        socket.on('delete-reply', (reply) => {
+            // Delete reply
+            db.deleteReply(reply)
+                // success
+                .then(obj =>
+                    io.emit('successful-delete-reply', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-delete-reply', 'Failed to delete the reply'))
+        })
+
+        socket.on('edit-reply', (reply) => {
+            // Edit reply
+            db.editReply(reply)
+                // success
+                .then(obj =>
+                    io.emit('successful-edit-reply', obj)
+                )
+                // error
+                .catch(err => io.emit('failed-edit-reply', 'Failed to edit reply'))
+        })
     })
 }

@@ -89,13 +89,13 @@ const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName
 const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: course.dept, number: course.num, section: course.section })
 
 // Used to check if an assignment exists already 
-const findAssignment = (courseId, assignment) => Assignment.findOne({courseId: courseId, title: assignment.title, description: assignment.description})
+const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title })
 
 // Used to check if a thread exists already 
-const findThread = (courseId, thread) => Thread.findOne({courseId: courseId, authorName: thread.author.name, title: thread.title, description: thread.description})
+const findThread = (thread) => Thread.findOne({ title: thread.title, authorName: thread.author.name, description: thread.description })
 
 // Used to check if a reply exists already 
-const findReply = (reply) => Reply.findOne({threadId: reply.threadId, authorName: reply.author.name, description: reply.description})
+const findReply = (reply) => Reply.findOne({ threadId: reply.threadId, authorName: reply.author.name, description: reply.description })
 
 
 // Validating user for logging in
@@ -231,7 +231,7 @@ const editCourse = (course) => {
 // Post assignment
 const postAssignment = (courseId, assignment) => {
     // Return an assignment object if assignment is not in db
-    return findAssignment(courseId, assignment)
+    return findAssignment(assignment)
         .then(found => {
             // Check if assignment is taken already
             if (found) {
@@ -268,12 +268,15 @@ const removeAssignment = (courseId, assignment) => {
 // Edit assignment
 const editAssignment = (assignment) => {
     return Assignment.findOneAndUpdate({ _id: assignment._id }, { "$set": { title: assignment.title, description: assignment.description } })
+    .then(obj => {
+        return assignment
+    })
 }
 
 // Post Thread
 const postThread = (courseId, thread) => {
     // Return a thread object if thread is not in db
-    return findThread(courseId, thread)
+    return findThread(thread)
         .then(found => {
             // Check if post is taken already
             if (found) {
@@ -295,7 +298,7 @@ const postThread = (courseId, thread) => {
         .then(thread => Thread.create(thread))
         // Find the course and push the new thread to the threads array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { threads: id } }))
-        .then((obj) => {return findThread(courseId, thread)})
+        .then((obj) => { return findThread(thread) })
 }
 
 // Remove assignment
@@ -311,6 +314,9 @@ const removeThread = (courseId, thread) => {
 // Edit thread
 const editThread = (thread) => {
     return Thread.findOneAndUpdate({ _id: thread._id }, { "$set": { title: thread.title, description: thread.description } })
+    .then(obj => {
+        return thread
+    })
 }
 
 // Reply to thread
@@ -338,6 +344,23 @@ const replyToThread = (reply) => {
         })
 }
 
+// Remove assignment
+const deleteReply = (reply) => {
+    return Reply.remove(reply)
+        .then(obj => Thread.findOneAndUpdate({ _id: reply.threadId }, { '$pull': { replies: reply._id } }))
+        .then(obj => {
+            return reply
+        })
+}
+
+// Edit reply
+const editReply = (reply) => {
+    return Reply.findOneAndUpdate({ _id: reply._id }, { "$set": { description: reply.description } })
+    .then(obj => {
+        return reply
+    })
+}
+
 module.exports = {
     activeUsers,
     createUser,
@@ -358,5 +381,7 @@ module.exports = {
     removeThread,
     editThread,
     replyToThread,
-    listOfReplies
+    listOfReplies,
+    deleteReply,
+    editReply,
 }

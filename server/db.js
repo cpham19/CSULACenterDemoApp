@@ -89,10 +89,10 @@ const findUserByName = (userName) => User.findOne({ name: { $regex: `^${userName
 const findCourseByDeptAndNumAndSection = (course) => Course.findOne({ dept: course.dept, number: course.num, section: course.section })
 
 // Used to check if an assignment exists already 
-const findAssignment = (assignment) => Assignment.findOne({ title: assignment.title })
+const findAssignment = (courseId, assignment) => Assignment.findOne({ courseId: courseId, title: assignment.title, description: assignment.description})
 
 // Used to check if a thread exists already 
-const findThread = (thread) => Thread.findOne({ title: thread.title, authorName: thread.author.name, description: thread.description })
+const findThread = (courseId, thread) => Thread.findOne({courseId: courseId, title: thread.title, authorName: thread.author.name, description: thread.description })
 
 // Used to check if a reply exists already 
 const findReply = (reply) => Reply.findOne({ threadId: reply.threadId, authorName: reply.author.name, description: reply.description })
@@ -231,7 +231,7 @@ const editCourse = (course) => {
 // Post assignment
 const postAssignment = (courseId, assignment) => {
     // Return an assignment object if assignment is not in db
-    return findAssignment(assignment)
+    return findAssignment(courseId, assignment)
         .then(found => {
             // Check if assignment is taken already
             if (found) {
@@ -250,10 +250,7 @@ const postAssignment = (courseId, assignment) => {
         .then(assignment => Assignment.create(assignment))
         // Find the course and push the new assignment to the assignments array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { assignments: id } }))
-        .then((obj) => findAssignment(assignment))
-        .then(({ courseId, _id, title, description }) => {
-            return { courseId, _id, title, description }
-        })
+        .then((obj) => findAssignment(courseId, assignment))
 }
 
 // Remove assignment
@@ -276,7 +273,7 @@ const editAssignment = (assignment) => {
 // Post Thread
 const postThread = (courseId, thread) => {
     // Return a thread object if thread is not in db
-    return findThread(thread)
+    return findThread(courseId, thread)
         .then(found => {
             // Check if post is taken already
             if (found) {
@@ -298,7 +295,7 @@ const postThread = (courseId, thread) => {
         .then(thread => Thread.create(thread))
         // Find the course and push the new thread to the threads array
         .then(({ id }) => Course.findOneAndUpdate({ _id: courseId }, { '$push': { threads: id } }))
-        .then((obj) => { return findThread(thread) })
+        .then((obj) => findThread(courseId, thread))
 }
 
 // Remove assignment

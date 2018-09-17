@@ -1,19 +1,152 @@
 const socket = io()
 
-const component = {
-    template: `<div class="column"> 
-                <h6 align="center">Questions in Database ({{list.length}})</h6>
-                <hr>
-                <ul v-for="obj in list">
-                    <li>
-                        <p v-show="admin">{{obj.question}} <button v-on:click="$emit('delete', obj.question)" class="delete" type="submit">Delete</button></p>
-                        <p v-show="!admin">{{obj.question}}</p>
-                    </li>
-                    <hr>
-                </ul>
-            </div>`,
-    props: ['list', 'admin']
+const searchedCoursesComponent = {
+    template: `<div>
+                    <ul v-for="course in courses">
+                        <li>
+                            <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
+                            <p>{{course.name}}</p>
+                            <p>{{course.description}}</p>
+                            <p>{{course.prof}} {{course.room}}</p>
+                            <button v-on:click="$emit('enroll', course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                        </li>
+                        <hr>
+                    </ul>
+                </div>`,
+    props: ['courses']
 }
+
+const dropCourseComponent = {
+    template: `<div>
+                    <ul v-for="course in courses">
+                        <li>
+                            <p>{{course.dept}} {{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('remove', course._id)"
+                                    class="btn-small waves-effect waves-light" type="submit">Remove</button></p>
+                        </li>
+                    <hr>
+                    </ul>
+                </div>`,
+    props: ['courses']
+}
+
+const removeCourseComponent = {
+    template: `<div>
+                    <ul v-for="courseId in me.courses">
+                        <template v-for="courseObj in courses">
+                            <li v-show="courseId === courseObj._id">
+                                <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}</p>
+                                <p>{{courseObj.name}}</p>
+                                <p>{{courseObj.prof}} {{courseObj.room}}</p>
+                                <button v-on:click="$emit('drop', courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
+                            </li>
+                        </template>
+                        <hr />
+                    </ul>
+                </div>`,
+    props: ['me', 'courses']
+}
+
+
+const assignmentComponent = {
+    template: `<div>
+                    <template v-for="course in courses">
+                        <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('add', course)"
+                                class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                        <table v-show="course.prof === me.name">
+                            <thead>
+                                <tr>
+                                    <th>Assignment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="assignment in assignments">
+                                    <td v-show="assignment.courseId === course._id">
+                                        <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
+                                    </td>
+                                    <td v-show="assignment.courseId === course._id">
+                                        <button v-on:click="$emit('edit', assignment)" class="button-align-left"
+                                            type="submit">Edit</button>
+                                        <button v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </div>`,
+    props: ['me', 'courses', 'assignments']
+}
+
+
+const forumComponent = {
+    template: `<div>
+                    <template v-for="course in courses">
+                        <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('create', course)"
+                                class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Thread</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="thread in threads">
+                                    <td v-show="thread.courseId === course._id"><a v-on:click="$emit('view', thread)">{{thread.title}}</a></td>
+                                    <td v-show="thread.courseId === course._id">
+                                        <button v-on:click="$emit('remove', thread)" class="button-align-left" type="submit">Remove</button>
+                                        <button v-on:click="$emit('edit', thread)" class="button-align-left" type="submit">Edit</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </template>
+                </div>`,
+    props: ['courses', 'threads']
+}
+
+const threadComponent = {
+    template: `<div>
+                    <strong>{{threadToView.title}}</strong>
+                    <br />
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Message</th>
+                                <th>Author</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <!-- First row is the author and his message -->
+                            <tr>
+                                <td class="post">{{threadToView.description}}</td>
+                                <td class="post"><img :src="threadToView.authorAvatar" width="25px">{{threadToView.authorName}}</td>
+                            </tr>
+
+                            <!-- Additional rows for replies and their authors -->
+                            <tr v-for="reply in replies">
+                                <td class="post" v-show="reply.threadId === threadToView._id && replyToEdit._id === reply._id && edittingReply">
+                                    <textarea v-model="replyToEdit.description" placeholder="description of reply"></textarea>
+                                    <button v-on:click="postEdittedReply(replyToEdit)" class="btn-small waves-effect waves-light"
+                                        type="submit">Submit Changes</button>
+                                </td>
+
+                                <td class="post" v-show="reply.threadId === threadToView._id && !edittingReply">{{reply.description}}</td>
+                                <td class="post" v-show="reply.threadId === threadToView._id">
+                                    <img :src="reply.authorAvatar" width="25px">{{reply.authorName}}<br />
+                                    <button v-on:click="editReply(reply)" class="btn-small waves-effect waves-light" type="submit"
+                                        v-show="!edittingReply">Edit</button>
+                                    <button v-on:click="deleteReply(reply)" class="btn-small waves-effect waves-light" type="submit"
+                                        v-show="!edittingReply">Delete</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>`,
+    props: ['replies', 'thread']
+}
+
 
 const app = new Vue({
     el: '#demo-app',
@@ -290,6 +423,12 @@ const app = new Vue({
         }
     },
     components: {
+        'searched-courses-component': searchedCoursesComponent,
+        'drop-course-component': dropCourseComponent,
+        'remove-course-component': removeCourseComponent,
+        'assignment-component': assignmentComponent,
+        'forum-component': forumComponent,
+        'thread-component': threadComponent
     }
 })
 
@@ -436,7 +575,7 @@ socket.on('successful-remove-assignment', assignment => {
             return courseObj
         })
 
-        app.assignments = app.assignments.filter(assignmentObj=> !(assignmentObj._id === assignment._id))
+        app.assignments = app.assignments.filter(assignmentObj => !(assignmentObj._id === assignment._id))
 
         console.log("REMOVED THE ASSIGNMENT: " + assignment._id)
     }

@@ -1,7 +1,6 @@
 module.exports = (server, db) => {
     const
-        io = require('socket.io')(server),
-        moment = require('moment')
+        io = require('socket.io')(server)
 
     io.on('connection', socket => {
         // when a connection is made - load in the content already present on the server

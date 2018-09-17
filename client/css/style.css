@@ -161,7 +161,11 @@ hr {
     padding: 0 0 0 2px;
 }
 
-/* Course Add Screen */
+/* Course Styles */
+.courseRow {
+    padding: 10x;
+}
+
 .row:after {
     content: "";
     display: table;

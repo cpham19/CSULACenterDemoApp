@@ -68,19 +68,7 @@
         <!-- Course list -->
         <div class="row" v-show="loggedIn && state === 'Home'">
             <div class="col s2">
-                <div class="course-list">
-                    <h4 align="center">Current Courses</h4>
-                    <hr />
-                    <ul v-for="courseId in me.courses">
-                        <li v-for="courseObj in courses" v-show="courseId === courseObj._id">
-                            <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}<br />
-                                {{courseObj.name}}<br />
-                                {{courseObj.prof}} {{courseObj.room}}<br />
-                            </p>
-                        </li>
-                        <hr />
-                    </ul>
-                </div>
+                <course-component v-bind:me="me" v-bind:courses="courses"></course-component>
             </div>
 
             <div class='col s10'>
@@ -265,42 +253,7 @@
                 <br />
                 <br />
 
-                <strong>{{threadToView.title}}</strong>
-                <br />
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Message</th>
-                            <th>Author</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <!-- First row is the author and his message -->
-                        <tr>
-                            <td class="post">{{threadToView.description}}</td>
-                            <td class="post"><img :src="threadToView.authorAvatar" width="25px">{{threadToView.authorName}}</td>
-                        </tr>
-
-                        <!-- Additional rows for replies and their authors -->
-                        <tr v-for="reply in replies">
-                            <td class="post" v-show="reply.threadId === threadToView._id && replyToEdit._id === reply._id && edittingReply">
-                                <textarea v-model="replyToEdit.description" placeholder="description of reply"></textarea>
-                                <button v-on:click="postEdittedReply(replyToEdit)" class="btn-small waves-effect waves-light"
-                                    type="submit">Submit Changes</button>
-                            </td>
-
-                            <td class="post" v-show="reply.threadId === threadToView._id && !edittingReply">{{reply.description}}</td>
-                            <td class="post" v-show="reply.threadId === threadToView._id">
-                                <img :src="reply.authorAvatar" width="25px">{{reply.authorName}}<br />
-                                <button v-on:click="editReply(reply)" class="btn-small waves-effect waves-light" type="submit"
-                                    v-show="!edittingReply">Edit</button>
-                                <button v-on:click="deleteReply(reply)" class="btn-small waves-effect waves-light" type="submit"
-                                    v-show="!edittingReply">Delete</button>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:delete="deleteReply" v-bind:replies="replies" v-bind:thread="threadToView" v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply"></thread-component>
 
                 <br />
 

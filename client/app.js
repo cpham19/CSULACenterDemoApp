@@ -16,7 +16,8 @@ const searchedCoursesComponent = {
     props: ['courses']
 }
 
-const dropCourseComponent = {
+
+const removeCourseComponent = {
     template: `<div>
                     <ul v-for="course in courses">
                         <li>
@@ -29,7 +30,7 @@ const dropCourseComponent = {
     props: ['courses']
 }
 
-const removeCourseComponent = {
+const dropCourseComponent = {
     template: `<div>
                     <ul v-for="courseId in me.courses">
                         <template v-for="courseObj in courses">
@@ -40,6 +41,24 @@ const removeCourseComponent = {
                                 <button v-on:click="$emit('drop', courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
                             </li>
                         </template>
+                        <hr />
+                    </ul>
+                </div>`,
+    props: ['me', 'courses']
+}
+
+
+const courseComponent = {
+    template: `<div class="course-list">
+                    <h4 align="center">Current Courses</h4>
+                    <hr />
+                    <ul v-for="courseId in me.courses">
+                        <li v-for="courseObj in courses" v-show="courseId === courseObj._id">
+                            <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}<br />
+                                {{courseObj.name}}<br />
+                                {{courseObj.prof}} {{courseObj.room}}<br />
+                            </p>
+                        </li>
                         <hr />
                     </ul>
                 </div>`,
@@ -107,7 +126,7 @@ const forumComponent = {
 
 const threadComponent = {
     template: `<div>
-                    <strong>{{threadToView.title}}</strong>
+                    <strong>{{thread.title}}</strong>
                     <br />
                     <table>
                         <thead>
@@ -120,31 +139,35 @@ const threadComponent = {
                         <tbody>
                             <!-- First row is the author and his message -->
                             <tr>
-                                <td class="post">{{threadToView.description}}</td>
-                                <td class="post"><img :src="threadToView.authorAvatar" width="25px">{{threadToView.authorName}}</td>
+                                <td class="post-description">{{thread.description}}</td>
+                                <td class="post-author">
+                                    <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
+                                    {{thread.authorName}}
+                                </td>
                             </tr>
 
                             <!-- Additional rows for replies and their authors -->
                             <tr v-for="reply in replies">
-                                <td class="post" v-show="reply.threadId === threadToView._id && replyToEdit._id === reply._id && edittingReply">
-                                    <textarea v-model="replyToEdit.description" placeholder="description of reply"></textarea>
-                                    <button v-on:click="postEdittedReply(replyToEdit)" class="btn-small waves-effect waves-light"
+                                <td class="post-description" v-show="reply.threadId === thread._id && editted_reply._id === reply._id && editting">
+                                    <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
+                                    <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light"
                                         type="submit">Submit Changes</button>
                                 </td>
 
-                                <td class="post" v-show="reply.threadId === threadToView._id && !edittingReply">{{reply.description}}</td>
-                                <td class="post" v-show="reply.threadId === threadToView._id">
-                                    <img :src="reply.authorAvatar" width="25px">{{reply.authorName}}<br />
-                                    <button v-on:click="editReply(reply)" class="btn-small waves-effect waves-light" type="submit"
-                                        v-show="!edittingReply">Edit</button>
-                                    <button v-on:click="deleteReply(reply)" class="btn-small waves-effect waves-light" type="submit"
-                                        v-show="!edittingReply">Delete</button>
+                                <td class="post-description" v-show="reply.threadId === thread._id && !editting">{{reply.description}}</td>
+                                <td class="post-author" v-show="reply.threadId === thread._id">
+                                    <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
+                                    {{reply.authorName}}<br />
+                                    <button v-on:click="$emit('edit', reply)" class="btn-small waves-effect waves-light" type="submit"
+                                        v-show="!editting">Edit</button>
+                                    <button v-on:click="$emit('delete', reply)" class="btn-small waves-effect waves-light" type="submit"
+                                        v-show="!editting">Delete</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>`,
-    props: ['replies', 'thread']
+    props: ['replies', 'thread', 'editting', 'editted_reply']
 }
 
 
@@ -424,6 +447,7 @@ const app = new Vue({
     },
     components: {
         'searched-courses-component': searchedCoursesComponent,
+        'course-component': courseComponent,
         'drop-course-component': dropCourseComponent,
         'remove-course-component': removeCourseComponent,
         'assignment-component': assignmentComponent,

@@ -219,11 +219,19 @@ hr {
     border: 1px solid black;
 }
 
-.post {
+.post-description {
     border: 1px solid black;
     vertical-align: top;
     text-align: left;
     height: 100px; 
+}
+
+.post-author {
+    border: 1px solid black;
+    vertical-align: center;
+    text-align: center;
+    height: 100px;
+    width:70px; 
 }
 
 .login {

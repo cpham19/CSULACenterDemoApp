@@ -29,26 +29,6 @@
 
 <body>
     <div id="demo-app">
-
-        <!-- header -->
-        <div class="header" v-show='loggedIn'>
-            <div class="header-left">
-                <img src="img/csula-logo.png" class="logo" width="100px" height="100px">
-            </div>
-            <div class="header-right">
-                <button v-show="state !== 'Home'" v-on:click="changeState('Home')" class="btn btn-primary" type="submit">Home</button>
-                <button v-show="state === 'Home'" v-on:click="changeState('Home')" class="btn btn-danger" type="submit">Home</button>
-                <button v-show="state !== 'Courses'" v-on:click="changeState('Courses')" class="btn btn-primary" type="submit">Courses</button>
-                <button v-show="state === 'Courses'" v-on:click="changeState('Courses')" class="btn btn-danger" type="submit">Courses</button>
-                <button v-show="state !== 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-primary"
-                    type="submit">Assignments</button>
-                <button v-show="state === 'Assignments'" v-on:click="changeState('Assignments')" class="btn btn-danger"
-                    type="submit">Assignments</button>
-                <button v-show="state !== 'Forums'" v-on:click="changeState('Forums')" class="btn btn-primary" type="submit">Forums</button>
-                <button v-show="state === 'Forums'" v-on:click="changeState('Forums')" class="btn btn-danger" type="submit">Forums</button>
-            </div>
-        </div>
-
         <!-- login screen -->
         <div v-show="!loggedIn">
             <img src="img/csula-logo.png" class="center" width="300px">
@@ -65,101 +45,40 @@
             </div>
         </div>
 
-        <!-- Course list -->
-        <div class="row" v-show="loggedIn && state === 'Home'">
-            <div class="col s2">
-                <course-component v-bind:me="me" v-bind:courses="courses"></course-component>
+        <!-- After logging in successfully -->
+        <div v-show='loggedIn'>
+            <!-- Header -->
+            <div class="header">
+                <header-component v-on:change="changeState" v-bind:state="state"></header-component>
             </div>
 
-            <div class='col s10'>
-                <p>Home Page</p>
-            </div>
-        </div>
+            <!-- Course list -->
+            <div class="row" v-show="state === 'Home'">
+                <div class="col s2">
+                    <course-component v-bind:me="me" v-bind:courses="courses"></course-component>
+                </div>
 
-        <!-- Course Page -->
-        <div v-show="loggedIn && state === 'Courses'">
-
-            <!-- Toggle between Searching Courses and Add Courses screen -->
-            <div class="courseRow">
-                <div class="column">
-                    <button class="block" v-on:click="changeCourseState('search')" type="submit">Search Courses</button>
-                </div>
-                <div class="column">
-                    <button class="block" v-on:click="changeCourseState('add')" type="submit">Add Course</button>
-                </div>
-                <div class="column">
-                    <button class="block" v-on:click="changeCourseState('drop')" type="submit">Drop Course</button>
-                </div>
-                <div class="column">
-                    <button class="block" v-on:click="changeCourseState('remove')" type="submit">Remove Course</button>
-                </div>
-                <div class="column">
-                    <button class="block" v-on:click="changeCourseState('edit')" type="submit">Edit Course</button>
+                <div class='col s10'>
+                    <p>Home Page</p>
                 </div>
             </div>
-            <br />
-            <br />
-            <br />
 
-            <!-- For Searching Courses -->
-            <div v-show="search">
-                <select class="browser-default" v-model="courseDept" v-on:click="searchCourse()">
-                    <option disabled value="">course dept</option>
-                    <option>CS</option>
-                    <option>ME</option>
-                    <option>BIOL</option>
-                    <option>PHYS</option>
-                    <option>CHEM</option>
-                    <option>COMM</option>
-                    <option>CE</option>
-                </select>
-                <input type="text" v-model="courseNumber" placeholder="course number" v-on:keyup="searchCourse()">
+            <!-- Course Page -->
+            <div v-show="state === 'Courses'">
+
+                <!-- Toggle between Searching Courses and Add Courses screen -->
+                <course-row-component v-on:change="changeCourseState"></course-row-component>
                 <br />
-                <hr />
+                <br />
+                <br />
 
-                <!-- search results component -->
-                <searched-courses-component v-on:enroll="enrollCourse" v-bind:courses="searchedCourses"></searched-courses-component>
-            </div>
+                <div v-show="!search && !add && !edit && !drop && !remove">
+                    <h1>Please select an option.</h1>
+                </div>
 
-            <!-- For Adding Courses -->
-            <div v-show="add">
-                <select class="browser-default" v-model="courseDept">
-                    <option disabled value="">course dept</option>
-                    <option>CS</option>
-                    <option>ME</option>
-                    <option>BIOL</option>
-                    <option>PHYS</option>
-                    <option>CHEM</option>
-                    <option>COMM</option>
-                    <option>CE</option>
-                </select>
-                <input v-model="courseName" placeholder="course name" type="text">
-                <input v-model="courseNumber" placeholder="course number" type="text">
-                <input v-model="courseSection" placeholder="course section" type="text">
-                <textarea v-model="courseDescription" placeholder="course description"></textarea>
-                <input v-model="courseUnit" placeholder="course unit" type="text">
-                <input v-model="courseProf" placeholder="course professor" type="text">
-                <input v-model="courseRoom" placeholder="course room" type="text">
-                <button v-on:click="addCourse" class="btn-small waves-effect waves-light" type="submit">Add</button>
-            </div>
-
-            <!-- Dropping Courses -->
-            <div v-show="drop">
-                <drop-course-component v-on:drop="dropCourse" v-bind:me="me" v-bind:courses="courses"></drop-course-component>
-            </div>
-
-            <!-- Removing Courses -->
-            <div v-show="remove">
-                <remove-course-component v-on:remove="removeCourse" v-bind:courses="courses"></remove-course-component>
-            </div>
-
-            <!-- Editting Courses -->
-            <div v-show="edit">
-                <select class="browser-default" v-model="newCourse">
-                    <option v-for="course in courses" v-bind:value="course">{{course.dept}}{{course.number}}-{{course.section}}-{{course.name}}</option>
-                </select>
-                <div v-show="newCourse">
-                    <select class="browser-default" v-model="newCourse.dept">
+                <!-- For Searching Courses -->
+                <div v-show="search">
+                    <select class="browser-default" v-model="courseDept" v-on:click="searchCourse(courseDept, courseNumber)">
                         <option disabled value="">course dept</option>
                         <option>CS</option>
                         <option>ME</option>
@@ -169,100 +88,92 @@
                         <option>COMM</option>
                         <option>CE</option>
                     </select>
-                    <input v-model="newCourse.name" placeholder="course name" type="text">
-                    <input v-model="newCourse.number" placeholder="course number" type="text">
-                    <input v-model="newCourse.section" placeholder="course section" type="text">
-                    <textarea v-model="newCourse.description" placeholder="course description"></textarea>
-                    <input v-model="newCourse.unit" placeholder="course unit" type="text">
-                    <input v-model="newCourse.prof" placeholder="course professor" type="text">
-                    <input v-model="newCourse.room" placeholder="course room" type="text">
-                    <button v-on:click="editCourse(newCourse)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
+                    <input type="text" v-model="courseNumber" placeholder="course number" v-on:keyup="searchCourse(courseDept, courseNumber)">
+                    <br />
+                    <hr />
+
+                    <!-- search results component -->
+                    <searched-courses-component v-on:enroll="enrollCourse" v-bind:courses="searchedCourses"></searched-courses-component>
+                </div>
+
+                <!-- For Adding Courses -->
+                <div v-show="add">
+                    <add-course-component v-on:add="addCourse" v-bind:dept="courseDept" v-bind:name="courseName"
+                        v-bind:number="courseNumber" v-bind:section="courseSection" v-bind:description="courseDescription"
+                        v-bind:unit="courseUnit" v-bind:prof="courseProf" v-bind:room="courseRoom"></add-course-component>
+                </div>
+
+                <!-- Dropping Courses -->
+                <div v-show="drop">
+                    <drop-course-component v-on:drop="dropCourse" v-bind:me="me" v-bind:courses="courses"></drop-course-component>
+                </div>
+
+                <!-- Removing Courses -->
+                <div v-show="remove">
+                    <remove-course-component v-on:remove="removeCourse" v-bind:courses="courses"></remove-course-component>
+                </div>
+
+                <!-- Editting Courses -->
+                <div v-show="edit">
+                    <edit-course-component v-on:edit="editCourse" v-on:back="backOutEdittingCourse" v-bind:course="newCourse" v-bind:courses="courses"></edit-course-component>
+                </div>
+            </div>
+
+            <!-- Assignments Page -->
+            <div v-show="state === 'Assignments'">
+                <!-- Show assignments -->
+                <div v-show="!addingAssignment && !edittingAssignment && !viewingAssignment">
+                    <assignment-component v-on:add="addAssignment" v-on:view="viewAssignment" v-on:remove="removeAssignment"
+                        v-on:edit="selectAssignmentToEdit" v-bind:me="me" v-bind:courses="courses" v-bind:assignments="assignments"></assignment-component>
+                </div>
+
+                <!-- Adding assignments -->
+                <div v-show="addingAssignment">
+                    <add-assignment-component v-on:post="postAssignment" v-bind:course="courseOfAssignmentToAdd"
+                        v-bind:title="assignmentTitle" v-bind:description="assignmentDescription">
+                    </add-assignment-component>
+                </div>
+
+                <!-- Editting assignments -->
+                <div v-show="edittingAssignment">
+                    <edit-assignment-component v-on:edit="editAssignment" v-on:back="backOutEdittingAssignment" v-bind:assignment="newAssignment"></edit-assignment-component>
+                </div>
+
+                <!-- Viewing assignments -->
+                <div v-show="viewingAssignment">
+                    <view-assignment-component v-on:back="backOutAssignment()" v-bind:assignment="assignmentToView"></view-assignment-component>
+                </div>
+            </div>
+
+            <!-- Forums page -->
+            <div v-show="state === 'Forums'">
+                <!-- Display forums -->
+                <div v-show="!addingThread && !edittingThread && !viewingThread">
+                    <forum-component v-on:create="createThread" v-on:view="viewThread" v-on:remove="removeThread"
+                        v-on:edit="selectThreadToEdit" v-bind:courses="courses" v-bind:threads="threads"></forum-component>
+                </div>
+
+                <!-- Adding threads -->
+                <div v-show="addingThread">
+                    <add-thread-component v-on:post="postThread" v-bind:course="courseOfThreadToAdd" v-bind:title="threadTitle"
+                        v-bind:description="threadDescription" v-bind:me="me"></add-thread-component>
+                </div>
+
+                <!-- Editting threads -->
+                <div v-show="edittingThread">
+                    <edit-thread-component v-on:edit="editThread" v-on:back="backOutEdittingThread" v-bind:thread="newThread"></edit-thread-component>
+                </div>
+
+                <!-- Viewing threads -->
+                <div v-show="viewingThread">
+                    <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread" v-on:back_reply="backOutEdittingReply" v-on:delete="deleteReply"
+                        v-on:reply="replyToThread" v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView"
+                        v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply" v-bind:new_reply="newReply"
+                        v-bind:me="me">
+                    </thread-component>
                 </div>
             </div>
         </div>
-
-        <!-- Assignments Page -->
-        <div v-show="loggedIn && state === 'Assignments'">
-            <!-- Show assignments -->
-            <div v-show="!addingAssignment && !edittingAssignment && !viewingAssignment">
-                <assignment-component v-on:add="addAssignment" v-on:view="viewAssignment" v-on:remove="removeAssignment" v-on:edit="selectAssignmentToEdit" v-bind:me="me" v-bind:courses="courses" v-bind:assignments="assignments"></assignment-component>
-            </div>
-
-            <!-- Adding assignments -->
-            <div v-show="addingAssignment">
-                <h1>Adding assignment to
-                    {{assignmentOfCourseToAdd.dept}}{{assignmentOfCourseToAdd.number}}-{{assignmentOfCourseToAdd.section}}
-                    {{assignmentOfCourseToAdd.name}}
-                </h1>
-                <input v-model="assignmentTitle" placeholder="title of assignment" type="text">
-                <textarea v-model="assignmentDescription" placeholder="description of assigment"></textarea>
-                <button v-on:click="postAssignment(assignmentOfCourseToAdd._id, assignmentTitle, assignmentDescription)"
-                    class="btn-small waves-effect waves-light" type="submit">Post</button>
-            </div>
-
-
-            <!-- Editting assignments -->
-            <div v-show="edittingAssignment">
-                <input v-model="newAssignment.title" placeholder="title of assignment" type="text">
-                <textarea v-model="newAssignment.description" placeholder="description of assigment"></textarea>
-                <button v-on:click="editAssignment(newAssignment)" class="btn-small waves-effect waves-light" type="submit">Submit
-                    Changes
-                </button>
-            </div>
-
-            <!-- Viewing assignments -->
-            <div v-show="viewingAssignment">
-                <button v-on:click="backOutAssignment()" type="submit">Back</button>
-                <h1>{{assignmentToView.title}}</h1>
-                <p>{{assignmentToView.description}}</p>
-            </div>
-        </div>
-
-
-        <!-- Forums page -->
-        <div v-show="loggedIn && state === 'Forums'">
-            <!-- Display forums -->
-            <div v-show="!addingThread && !edittingThread && !viewingThread">
-                <forum-component v-on:create="createThread" v-on:view="viewThread" v-on:remove="removeThread" v-on:edit="selectThreadToEdit" v-bind:courses="courses" v-bind:threads="threads"></forum-component>
-            </div>
-
-            <!-- Adding threads -->
-            <div v-show="addingThread">
-                <h1>Adding thread to
-                    {{courseOfThreadToAdd.dept}}{{courseOfThreadToAdd.number}}-{{courseOfThreadToAdd.section}}
-                    {{courseOfThreadToAdd.name}}
-                </h1>
-                <input v-model="threadTitle" placeholder="title of thread" type="text">
-                <textarea v-model="threadDescription" placeholder="description of thread"></textarea>
-                <button v-on:click="postThread(courseOfThreadToAdd._id, me, threadTitle, threadDescription)" class="btn-small waves-effect waves-light"
-                    type="submit">Post</button>
-            </div>
-
-            <!-- Editting threads -->
-            <div v-show="edittingThread">
-                <input v-model="newThread.title" placeholder="title of thread" type="text">
-                <textarea v-model="newThread.description" placeholder="description of thread"></textarea>
-                <button v-on:click="editThread(newThread)" class="btn-small waves-effect waves-light" type="submit">Submit
-                    Changes
-                </button>
-            </div>
-
-            <!-- Viewing threads -->
-            <div v-show="viewingThread">
-                <button v-on:click="backOutThread()" type="submit">Back</button>
-                <br />
-                <br />
-
-                <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:delete="deleteReply" v-bind:replies="replies" v-bind:thread="threadToView" v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply"></thread-component>
-
-                <br />
-
-                <!-- For creating a new reply to a thread -->
-                <textarea v-model="newReply" placeholder="description of reply"></textarea>
-                <button v-on:click="replyToThread(threadToView._id, me, newReply)">Reply</button>
-            </div>
-        </div>
-
     </div>
 
     <script type="text/javascript" src="https://unpkg.com/vue@2.5.15/dist/vue.min.js"></script>

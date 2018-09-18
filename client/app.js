@@ -1,5 +1,48 @@
 const socket = io()
 
+const headerComponent = {
+    template: `<div>
+                    <div class="header-left">
+                        <img src="img/csula-logo.png" class="logo" width="100px" height="100px">
+                    </div>
+    
+                    <div class="header-right">
+                        <button v-show="state !== 'Home'" v-on:click="$emit('change', 'Home')" class="btn btn-primary" type="submit">Home</button>
+                        <button v-show="state === 'Home'" v-on:click="$emit('change', 'Home')" class="btn btn-danger" type="submit">Home</button>
+                        <button v-show="state !== 'Courses'" v-on:click="$emit('change', 'Courses')" class="btn btn-primary" type="submit">Courses</button>
+                        <button v-show="state === 'Courses'" v-on:click="$emit('change', 'Courses')" class="btn btn-danger" type="submit">Courses</button>
+                        <button v-show="state !== 'Assignments'" v-on:click="$emit('change', 'Assignments')" class="btn btn-primary"
+                            type="submit">Assignments</button>
+                        <button v-show="state === 'Assignments'" v-on:click="$emit('change', 'Assignments')" class="btn btn-danger"
+                            type="submit">Assignments</button>
+                        <button v-show="state !== 'Forums'" v-on:click="$emit('change', 'Forums')" class="btn btn-primary" type="submit">Forums</button>
+                        <button v-show="state === 'Forums'" v-on:click="$emit('change', 'Forums')" class="btn btn-danger" type="submit">Forums</button>
+                    </div>
+                </div>`,
+    props: ['state']
+}
+
+const courseButtonsComponent = {
+    template: `<div class="courseRow">
+                    <div class="column">
+                        <button class="block" v-on:click="$emit('change', 'search')" type="submit">Search Courses</button>
+                    </div>
+                    <div class="column">
+                        <button class="block" v-on:click="$emit('change', 'add')" type="submit">Add Course</button>
+                    </div>
+                    <div class="column">
+                        <button class="block" v-on:click="$emit('change', 'drop')" type="submit">Drop Course</button>
+                    </div>
+                    <div class="column">
+                        <button class="block" v-on:click="$emit('change', 'remove')" type="submit">Remove Course</button>
+                    </div>
+                    <div class="column">
+                        <button class="block" v-on:click="$emit('change', 'edit')" type="submit">Edit Course</button>
+                    </div>
+                </div>`,
+    props: []
+}
+
 const searchedCoursesComponent = {
     template: `<div>
                     <ul v-for="course in courses">
@@ -14,6 +57,32 @@ const searchedCoursesComponent = {
                     </ul>
                 </div>`,
     props: ['courses']
+}
+
+const addCourseComponent = {
+    template: `<div>
+                    <select class="browser-default" v-model="dept">
+                        <option disabled value="">course dept</option>
+                        <option>CS</option>
+                        <option>ME</option>
+                        <option>BIOL</option>
+                        <option>PHYS</option>
+                        <option>CHEM</option>
+                        <option>COMM</option>
+                    <option>CE</option>
+                    </select>
+
+                    <input v-model="name" placeholder="course name" type="text">
+                    <input v-model="number" placeholder="course number" type="text">
+                    <input v-model="section" placeholder="course section" type="text">
+                    <textarea v-model="description" placeholder="course description"></textarea>
+                    <input v-model="unit" placeholder="course unit" type="text">
+                    <input v-model="prof" placeholder="course professor" type="text">
+                    <input v-model="room" placeholder="course room" type="text">
+                    <button v-on:click="$emit('add', dept, name, number, section, description, unit, prof, room)" class="btn-small waves-effect waves-light" type="submit">Add</button>
+                    <button v-on:click="$emit('discard')" class="btn-small waves-effect waves-light" type="submit">Discard</button>
+                </div>`,
+    props: ['dept', 'name', 'number', 'section', 'description', 'unit', 'prof', 'room']
 }
 
 
@@ -45,6 +114,36 @@ const dropCourseComponent = {
                     </ul>
                 </div>`,
     props: ['me', 'courses']
+}
+
+const editCourseComponent = {
+    template: `<div>
+                    <select class="browser-default" v-model="course">
+                        <option v-for="courseObj in courses" v-bind:value="courseObj">{{courseObj.dept}}{{courseObj.number}}-{{courseObj.section}}-{{courseObj.name}}</option>
+                    </select>
+                    <div v-show="course.dept">
+                        <select class="browser-default" v-model="course.dept">
+                                <option disabled value="">course dept</option>
+                                <option>CS</option>
+                                <option>ME</option>
+                                <option>BIOL</option>
+                                <option>PHYS</option>
+                                <option>CHEM</option>
+                                <option>COMM</option>
+                                <option>CE</option>
+                        </select>
+                        <input v-model="course.name" placeholder="course name" type="text">
+                        <input v-model="course.number" placeholder="course number" type="text">
+                        <input v-model="course.section" placeholder="course section" type="text">
+                        <textarea v-model="course.description" placeholder="course description"></textarea>
+                        <input v-model="course.unit" placeholder="course unit" type="text">
+                        <input v-model="course.prof" placeholder="course professor" type="text">
+                        <input v-model="course.room" placeholder="course room" type="text">
+                        <button v-on:click="$emit('edit', course)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
+                        <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                    </div>
+                </div>`,
+    props: ['course', 'courses']
 }
 
 
@@ -96,6 +195,38 @@ const assignmentComponent = {
     props: ['me', 'courses', 'assignments']
 }
 
+const addAssignmentComponent = {
+    template: `<div>
+                    <h1>Adding assignment to
+                        {{course.dept}}{{course.number}}-{{course.section}}
+                        {{course.name}}
+                    </h1>
+                    <input v-model="title" placeholder="title of assignment" type="text">
+                    <textarea v-model="description" placeholder="description of assignment"></textarea>
+                    <button v-on:click="$emit('post', course._id, title, description)"
+                        class="btn-small waves-effect waves-light" type="submit">Post</button>
+                </div>`,
+    props: ['course', 'title', 'description']
+}
+
+const editAssignmentComponent = {
+    template: `<div>
+                    <input v-model="assignment.title" placeholder="title of assignment" type="text">
+                    <textarea v-model="assignment.description" placeholder="description of assignment"></textarea>
+                    <button v-on:click="$emit('edit', assignment)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                    <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                </div>`,
+    props: ['assignment',]
+}
+
+const viewAssignmentComponent = {
+    template: `<div>
+                    <button v-on:click="$emit('back')" type="submit">Back</button>
+                    <h1>{{assignment.title}}</h1>
+                    <p>{{assignment.description}}</p>
+                </div>`,
+    props: ['assignment',]
+}
 
 const forumComponent = {
     template: `<div>
@@ -124,50 +255,84 @@ const forumComponent = {
     props: ['courses', 'threads']
 }
 
+const addThreadComponent = {
+    template: `<div>
+                    <h1>Adding thread to
+                        {{course.dept}}{{course.number}}-{{course.section}} {{course.name}}
+                    </h1>
+                    <input v-model="title" placeholder="title of thread" type="text">
+                    <textarea v-model="description" placeholder="description of thread"></textarea>
+                    <button v-on:click="$emit('post', course._id, me, title, description)" class="btn-small waves-effect waves-light" type="submit">Post</button>
+                </div>`,
+    props: ['course', 'title', 'description', 'me']
+}
+
+const editThreadComponent = {
+    template: `<div>
+                    <input v-model="thread.title" placeholder="title of thread" type="text">
+                    <textarea v-model="thread.description" placeholder="description of thread"></textarea>
+                    <button v-on:click="$emit('edit', newThread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                    <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                </div>`,
+    props: ['thread']
+}
+
 const threadComponent = {
     template: `<div>
-                    <strong>{{thread.title}}</strong>
+                    <button v-on:click="$emit('back_thread')" type="submit">Back</button>
                     <br />
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Message</th>
-                                <th>Author</th>
-                            </tr>
-                        </thead>
+                    <br />
 
-                        <tbody>
-                            <!-- First row is the author and his message -->
-                            <tr>
-                                <td class="post-description">{{thread.description}}</td>
-                                <td class="post-author">
-                                    <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
-                                    {{thread.authorName}}
-                                </td>
-                            </tr>
+                    <div v-show="editting">
+                        <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
+                        <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                        <button v-on:click="$emit('back_reply')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                    </div>
 
-                            <!-- Additional rows for replies and their authors -->
-                            <tr v-for="reply in replies">
-                                <td class="post-description" v-show="reply.threadId === thread._id && editted_reply._id === reply._id && editting">
-                                    <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
-                                    <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light"
-                                        type="submit">Submit Changes</button>
-                                </td>
+                    <div v-show="!editting">
+                        <strong>{{thread.title}}</strong>
+                        <br />
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Message</th>
+                                    <th>Author</th>
+                                </tr>
+                            </thead>
 
-                                <td class="post-description" v-show="reply.threadId === thread._id && !editting">{{reply.description}}</td>
-                                <td class="post-author" v-show="reply.threadId === thread._id">
-                                    <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
-                                    {{reply.authorName}}<br />
-                                    <button v-on:click="$emit('edit', reply)" class="btn-small waves-effect waves-light" type="submit"
-                                        v-show="!editting">Edit</button>
-                                    <button v-on:click="$emit('delete', reply)" class="btn-small waves-effect waves-light" type="submit"
-                                        v-show="!editting">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            <tbody>
+                                <!-- First row is the author and his message -->
+                                <tr>
+                                    <td class="post-description">{{thread.description}}</td>
+                                    <td class="post-author">
+                                        <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
+                                        {{thread.authorName}}
+                                    </td>
+                                </tr>
+
+                                <!-- Additional rows for replies and their authors -->
+                                <tr v-for="reply in replies">
+                                    <td class="post-description" v-show="reply.threadId === thread._id">{{reply.description}}</td>
+                                    <td class="post-author" v-show="reply.threadId === thread._id">
+                                        <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
+                                        {{reply.authorName}}<br />
+                                        <button v-on:click="$emit('edit', reply)" type="submit"
+                                            v-show="!editting">Edit</button>
+                                        <button v-on:click="$emit('delete', reply)" type="submit"
+                                            v-show="!editting">Delete</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <br />
+
+                        <!-- For creating a new reply to a thread -->
+                        <textarea v-model="new_reply" placeholder="description of reply"></textarea>
+                        <button v-on:click="$emit('reply', thread, me, new_reply)">Reply</button>
+                    </div>
                 </div>`,
-    props: ['replies', 'thread', 'editting', 'editted_reply']
+    props: ['replies', 'thread', 'editting', 'editted_reply', 'new_reply', 'me']
 }
 
 
@@ -195,7 +360,7 @@ const app = new Vue({
         courseUnit: '',
         courseProf: '',
         courseRoom: '',
-        search: true,
+        search: false,
         add: false,
         drop: false,
         remove: false,
@@ -203,7 +368,7 @@ const app = new Vue({
         searchedCourses: [],
         addingAssignment: false,
         edittingAssignment: false,
-        assignmentOfCourseToAdd: '',
+        courseOfAssignmentToAdd: {},
         assignmentTitle: '',
         assignmentDescription: '',
         newCourse: {},
@@ -289,18 +454,18 @@ const app = new Vue({
                 this.edit = true
             }
         },
-        addCourse: function () {
-            if (!this.courseDept || !this.courseName || !this.courseSection || !this.courseDescription || !this.courseUnit || !this.courseProf || !this.courseRoom) {
+        addCourse: function (dept, name, number, section, description, unit, prof, room) {
+            if (!dept || !name || !number || !section || !description || !unit || !prof || !room) {
                 return
             }
 
-            const course = { dept: this.courseDept, name: this.courseName, number: this.courseNumber, section: this.courseSection, description: this.courseDescription, unit: this.courseUnit, prof: this.courseProf, room: this.courseRoom }
+            const course = { dept: dept, name: name, number: number, section: section, description: description, unit: unit, prof: prof, room: room }
 
             socket.emit('add-course', course)
         },
-        searchCourse: function () {
+        searchCourse: function (dept, number) {
             // If courseDept is empty, do nothing
-            if (!this.courseDept || (!this.courseDept && !this.courseNumber)) {
+            if (!dept || (!dept && !number)) {
                 return
             }
 
@@ -310,10 +475,10 @@ const app = new Vue({
             // If user only selected a department OR
             // If user selected a department and typed a course number
             this.searchedCourses = this.courses.filter(course => {
-                if (course.dept === this.courseDept && !this.courseNumber) {
+                if (course.dept === dept && !number) {
                     return course
                 }
-                else if (course.dept === this.courseDept && course.number.toString().includes(this.courseNumber.toString())) {
+                else if (course.dept === dept && course.number.toString().includes(number.toString())) {
                     return course
                 }
             })
@@ -348,12 +513,16 @@ const app = new Vue({
             if (!newCourse.dept || !newCourse.name || !newCourse.section || !newCourse.description || !newCourse.unit || !newCourse.prof || !newCourse.room) {
                 return
             }
+
             socket.emit('edit-course', newCourse)
+        },
+        backOutEdittingCourse: function () {
+            this.edit = false
         },
         addAssignment: function (course) {
             this.addingAssignment = true
             this.edittingAssignment = false
-            this.assignmentOfCourseToAdd = course
+            this.courseOfAssignmentToAdd = course
         },
         postAssignment: function (courseId, assignmentTitle, assignmentDescription) {
             if (!assignmentTitle || !assignmentDescription) {
@@ -377,6 +546,9 @@ const app = new Vue({
             }
 
             socket.emit('edit-assignment', assignment)
+        },
+        backOutEdittingAssignment: function () {
+            this.edittingAssignment = false
         },
         createThread: function (course) {
             this.addingThread = true
@@ -408,6 +580,9 @@ const app = new Vue({
 
             socket.emit('edit-thread', thread)
         },
+        backOutEdittingThread: function () {
+            this.edittingThread = false
+        },
         viewAssignment: function (assignment) {
             this.viewingAssignment = true
             this.assignmentToView = assignment
@@ -438,6 +613,9 @@ const app = new Vue({
             this.edittingReply = true
             this.replyToEdit = reply
         },
+        backOutEdittingReply: function () {
+            this.edittingReply = false
+        },
         postEdittedReply: function (reply) {
             socket.emit('edit-reply', reply)
         },
@@ -446,12 +624,21 @@ const app = new Vue({
         }
     },
     components: {
-        'searched-courses-component': searchedCoursesComponent,
+        'header-component': headerComponent,
+        'course-row-component': courseButtonsComponent,
         'course-component': courseComponent,
+        'searched-courses-component': searchedCoursesComponent,
+        'add-course-component': addCourseComponent,
         'drop-course-component': dropCourseComponent,
+        'edit-course-component': editCourseComponent,
         'remove-course-component': removeCourseComponent,
         'assignment-component': assignmentComponent,
+        'add-assignment-component': addAssignmentComponent,
+        'edit-assignment-component': editAssignmentComponent,
+        'view-assignment-component': viewAssignmentComponent,
         'forum-component': forumComponent,
+        'add-thread-component': addThreadComponent,
+        'edit-thread-component': editThreadComponent,
         'thread-component': threadComponent
     }
 })
@@ -620,8 +807,7 @@ socket.on('successful-post-assignment', assignment => {
 
         app.assignmentTitle = ''
         app.assignmentDescription = ''
-        app.assignmentOfCourseToAdd.title = ''
-        app.assignmentOfCourseToAdd.description = ''
+        app.courseOfAssignmentToAdd.title = {}
         app.addingAssignment = false
 
         console.log("POSTED ASSIGNMENT: " + assignment._id)

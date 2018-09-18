@@ -225,7 +225,10 @@ const removeCourse = (courseId) => {
 
 // Edit course
 const editCourse = (course) => {
-    return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room } })
+    return Course.findOneAndUpdate({ _id: course._id }, { "$set": { dept: course.dept, name: course.name, number: course.number, section: course.section, description: course.description, unit: course.unit, prof: course.prof, room: course.room }})
+    .then(obj => {
+        return course
+    })
 }
 
 // Post assignment

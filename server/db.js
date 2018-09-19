@@ -10,6 +10,14 @@ Mongoose.connection.on('error', err => {
 
 // Schema for User 
 const UserSchema = new Mongoose.Schema({
+    firstName: String,
+    lastName: String,
+    streetAddress: String,
+    city: String,
+    state: String,
+    zipCode: Number,
+    email: String,
+    phoneNumber: String,
     name: String,
     avatar: String,
     socketId: String,
@@ -124,13 +132,13 @@ const loginUser = (userName, password, socketId) => {
         // active == have socketId
         .then(({ _id }) => User.findOneAndUpdate({ _id }, { $set: { socketId } }))
         // return name and avatar
-        .then(({ name, avatar, admin, courses }) => {
-            return { name, avatar, admin, courses }
+        .then(({firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber, name, avatar, admin, courses }) => {
+            return { firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber, name, avatar, admin, courses }
         })
 }
 
 // Create a user
-const createUser = (userName, password, administrator, socketId) => {
+const createUser = (firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber, userName, password, administrator, socketId) => {
     // Return a user object if username is in db
     return findUserByName(userName)
         .then(found => {
@@ -142,6 +150,14 @@ const createUser = (userName, password, administrator, socketId) => {
             // Return an object if username doesnt exist
             return {
                 socketId,
+                firstName: firstName,
+                lastName: lastName,
+                streetAddress: streetAddress,
+                city: city,
+                state: state,
+                zipCode: zipCode,
+                email: email,
+                phoneNumber: phoneNumber,
                 name: userName,
                 password: generateHash(password),
                 admin: administrator,
@@ -152,8 +168,8 @@ const createUser = (userName, password, administrator, socketId) => {
         // Create user from user object 
         .then(user => User.create(user))
         // Return name, avatar, admin, and courses
-        .then(({ name, avatar, admin, courses }) => {
-            return { name, avatar, admin, courses }
+        .then(({ firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber, name, avatar, admin, courses }) => {
+            return { firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber,  name, avatar, admin, courses }
         })
 }
 

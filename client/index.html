@@ -33,12 +33,33 @@
         <div v-show="!loggedIn">
             <img src="img/csula-logo.png" class="center" width="300px">
 
-            <input v-model="userName" placeholder="name" type="text" class="u-full-width">
-            <input v-model="password" placeholder="password" type="password" class="u-full-width">
-            <button v-on:click="joinUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Login</button>
-            <button v-on:click="signupUser" :disabled="!userName" class="btn-small waves-effect waves-light" type="submit">Sign
-                Up
-            </button>
+            <div v-show="!signingUp">
+                <input v-model="userName" placeholder="name" type="text" class="u-full-width">
+                <input v-model="password" placeholder="password" type="password" class="u-full-width">
+                <button v-on:click="joinUser" :disabled="!userName || !password" class="btn-small waves-effect waves-light"
+                    type="submit">Login</button>
+                <a v-on:click="toggleSignup()">New User?</a>
+            </div>
+
+            <div v-show="signingUp">
+                <input v-model="firstName" placeholder="first name" type="text" class="u-full-width">
+                <input v-model="lastName" placeholder="last name" type="text" class="u-full-width">
+                <input v-model="streetAddress" placeholder="street address" type="text" class="u-full-width">
+                <input v-model="city" placeholder="city" type="text" class="u-full-width">
+                <select class="browser-default" v-model="stateLocation">
+                    <option stateLocation disabled hidden value="">Choose your state</option>
+                    <option v-for="stateAbbrev in states" v-bind:value="stateAbbrev">{{stateAbbrev}}</option>
+                </select>
+                <input v-model="zipCode" placeholder="zipCode" type="text" class="u-full-width">
+                <input v-model="email" placeholder="email address" type="text" class="u-full-width">
+                <input v-model="phoneNumber" placeholder="phone number" type="text" class="u-full-width">
+                <input v-model="userName" placeholder="username" type="text" class="u-full-width">
+                <input v-model="password" placeholder="password" type="password" class="u-full-width">
+                <button v-on:click="signupUser" :disabled="!firstName || !lastName || !streetAddress || !city || !stateLocation || !zipCode || !email || !phoneNumber || !userName || !password"
+                    class="btn-small waves-effect waves-light" type="submit">Sign
+                    Up</button>
+                <button v-on:click="backOutSigningUp" class="btn-small waves-effect waves-light" type="submit">Back</button>
+            </div>
 
             <div class="failed" v-show='failedName'>
                 <p>Wrong password, Username '{{failedName}}' doesn't exists, or is logged in!</p>
@@ -52,14 +73,17 @@
                 <header-component v-on:change="changeState" v-bind:state="state"></header-component>
             </div>
 
-            <!-- Course list -->
+            <!-- Home page -->
             <div class="row" v-show="state === 'Home'">
+
+                <!-- Course list -->
                 <div class="col s2">
                     <course-component v-bind:me="me" v-bind:courses="courses"></course-component>
                 </div>
 
+                <!-- User Information -->
                 <div class='col s10'>
-                    <p>Home Page</p>
+                    <home-component v-bind:me="me"></home-component>
                 </div>
             </div>
 
@@ -89,8 +113,6 @@
                         <option>CE</option>
                     </select>
                     <input type="text" v-model="courseNumber" placeholder="course number" v-on:keyup="searchCourse(courseDept, courseNumber)">
-                    <br />
-                    <hr />
 
                     <!-- search results component -->
                     <searched-courses-component v-on:enroll="enrollCourse" v-bind:courses="searchedCourses"></searched-courses-component>
@@ -115,7 +137,8 @@
 
                 <!-- Editting Courses -->
                 <div v-show="edit">
-                    <edit-course-component v-on:edit="editCourse" v-on:back="backOutEdittingCourse" v-bind:course="newCourse" v-bind:courses="courses"></edit-course-component>
+                    <edit-course-component v-on:edit="editCourse" v-on:back="backOutEdittingCourse" v-bind:course="newCourse"
+                        v-bind:courses="courses"></edit-course-component>
                 </div>
             </div>
 
@@ -136,7 +159,8 @@
 
                 <!-- Editting assignments -->
                 <div v-show="edittingAssignment">
-                    <edit-assignment-component v-on:edit="editAssignment" v-on:back="backOutEdittingAssignment" v-bind:assignment="newAssignment"></edit-assignment-component>
+                    <edit-assignment-component v-on:edit="editAssignment" v-on:back="backOutEdittingAssignment"
+                        v-bind:assignment="newAssignment"></edit-assignment-component>
                 </div>
 
                 <!-- Viewing assignments -->
@@ -166,8 +190,9 @@
 
                 <!-- Viewing threads -->
                 <div v-show="viewingThread">
-                    <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread" v-on:back_reply="backOutEdittingReply" v-on:delete="deleteReply"
-                        v-on:reply="replyToThread" v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView"
+                    <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread"
+                        v-on:back_reply="backOutEdittingReply" v-on:delete="deleteReply" v-on:reply="replyToThread"
+                        v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView"
                         v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply" v-bind:new_reply="newReply"
                         v-bind:me="me">
                     </thread-component>

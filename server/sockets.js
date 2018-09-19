@@ -13,13 +13,13 @@ module.exports = (server, db) => {
         // demo code only for sockets + db
         // in production login/user creation should happen with a POST to https endpoint
         // upon success - revert to websockets
-        socket.on('create-user', (userName, password, admin) => {
+        socket.on('create-user', (firstName, lastName, streetAddress, city, zipCode, state, email, phoneNumber, userName, password, admin) => {
             // create user
-            db.createUser(userName, password, admin, socket.id)
+            db.createUser(firstName, lastName, streetAddress, city, state, zipCode, email, phoneNumber, userName, password, admin, socket.id)
                 // success
                 .then(created => io.emit('successful-join', created))
                 // error
-                .catch(err => io.emit('failed-join', { name: userName }))
+                .catch(err => io.emit('failed-join', 'Failed to create account'))
         })
 
         socket.on('join-user', (userName, password) => {
@@ -28,7 +28,7 @@ module.exports = (server, db) => {
                 // success
                 .then(created => io.emit('successful-join', created))
                 // error
-                .catch(err => io.emit('failed-join', { name: userName }))
+                .catch(err => io.emit('failed-join', 'Failed to join'))
         })
 
         socket.on('disconnect', () => {
@@ -47,7 +47,7 @@ module.exports = (server, db) => {
                     io.emit('successful-add-course', added)
                 )
                 // error
-                .catch(err => io.emit('failed-add-course', { dept: courseDept }))
+                .catch(err => io.emit('failed-add-course', 'Failed to add course'))
         })
 
         socket.on('enroll-course', (userName, courseId) => {

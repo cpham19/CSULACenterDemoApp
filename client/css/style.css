@@ -9,7 +9,6 @@ hr {
 }
 
 /* WELCOME STYLES */
-
 .col.s12 {
     background: white;
     border-top: 10px solid black;
@@ -70,6 +69,7 @@ hr {
   overflow: hidden;
   background-color: #f1f1f1;
   padding: 5px 5px;
+  border: 1px solid black;
 }
 
 /* Style the header links */
@@ -102,9 +102,15 @@ hr {
   color: white;
 }
 
-/* Float the link section to the right */
+/* Float the section to the left */
+.header-left {
+    float: left;
+  }
+
+/* Float the section to the right */
 .header-right {
   float: right;
+  vertical-align: bottom;
 }
 
 /* Add media queries for responsiveness - when the screen is 500px wide or less, stack the links on top of each other */ 
@@ -118,6 +124,7 @@ hr {
     float: none;
   }
 }
+
 
 /* Left Column Style*/
 .col.s2 {
@@ -237,4 +244,10 @@ hr {
 .login {
     margin-bottom: 2.6rem;
     position: relative;  
-  }
+}
+
+/* Home Page */
+
+.display-4 {
+    text-decoration: underline;
+}

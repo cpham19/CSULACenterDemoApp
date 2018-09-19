@@ -22,6 +22,28 @@ const headerComponent = {
     props: ['state']
 }
 
+const homeComponent = {
+    template:  `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <h1 class="display-4">User Information</h1>
+
+                        <h2 class="display-4">Full Name</h2>
+                        <p class="lead">{{me.firstName}} {{me.lastName}}</p>
+
+                        <h2 class="display-4">Address</h2>
+                        <p class="lead">{{me.streetAddress}}, {{me.city}} {{me.state}} {{me.zipCode}}</p>
+
+                        <h2 class="display-4">Email</h2>
+                        <p class="lead">{{me.email}}</p>   
+                        
+                        <h2 class="display-4">Phone Number</h2>
+                        <p class="lead">{{me.phoneNumber}}</p>
+                    </div>
+                </div>`,
+    props: ['me']
+}
+
+
 const courseButtonsComponent = {
     template: `<div class="courseRow">
                     <div class="column">
@@ -47,13 +69,26 @@ const searchedCoursesComponent = {
     template: `<div>
                     <ul v-for="course in courses">
                         <li>
-                            <p>{{course.dept}} {{course.number}}-{{course.section}}</p>
-                            <p>{{course.name}}</p>
-                            <p>{{course.description}}</p>
-                            <p>{{course.prof}} {{course.room}}</p>
-                            <button v-on:click="$emit('enroll', course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                            <div class="jumbotron jumbotron-fluid">
+                                <div class="container">
+                                    <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
+
+                                    <h2 class="display-4">Name</h2>
+                                    <p class="lead">{{course.name}}</p>
+
+                                    <h2 class="display-4">Description</h2>
+                                    <p class="lead">{{course.description}}</p>
+
+                                    <h2 class="display-4">Professor</h2>
+                                    <p class="lead">{{course.prof}}</p>
+
+                                    <h2 class="display-4">Room</h2>
+                                    <p class="lead">{{course.room}}</p>
+
+                                    <button v-on:click="$emit('enroll', course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                                </div>
+                            </div>
                         </li>
-                        <hr>
                     </ul>
                 </div>`,
     props: ['courses']
@@ -69,7 +104,7 @@ const addCourseComponent = {
                         <option>PHYS</option>
                         <option>CHEM</option>
                         <option>COMM</option>
-                    <option>CE</option>
+                        <option>CE</option>
                     </select>
 
                     <input v-model="name" placeholder="course name" type="text">
@@ -90,10 +125,26 @@ const removeCourseComponent = {
     template: `<div>
                     <ul v-for="course in courses">
                         <li>
-                            <p>{{course.dept}} {{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('remove', course._id)"
-                                    class="btn-small waves-effect waves-light" type="submit">Remove</button></p>
+                            <div class="jumbotron jumbotron-fluid">
+                                <div class="container">
+                                    <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
+
+                                    <h2 class="display-4">Name</h2>
+                                    <p class="lead">{{course.name}}</p>
+
+                                    <h2 class="display-4">Description</h2>
+                                    <p class="lead">{{course.description}}</p>
+
+                                    <h2 class="display-4">Professor</h2>
+                                    <p class="lead">{{course.prof}}</p>
+
+                                    <h2 class="display-4">Room</h2>
+                                    <p class="lead">{{course.room}}</p>
+                                    
+                                    <button v-on:click="$emit('remove', course._id)" class="btn-small waves-effect waves-light" type="submit">Remove</button></p>
+                                </div>
+                            </div>
                         </li>
-                    <hr>
                     </ul>
                 </div>`,
     props: ['courses']
@@ -102,15 +153,29 @@ const removeCourseComponent = {
 const dropCourseComponent = {
     template: `<div>
                     <ul v-for="courseId in me.courses">
-                        <template v-for="courseObj in courses">
-                            <li v-show="courseId === courseObj._id">
-                                <p>{{courseObj.dept}} {{courseObj.number}}-{{courseObj.section}}</p>
-                                <p>{{courseObj.name}}</p>
-                                <p>{{courseObj.prof}} {{courseObj.room}}</p>
-                                <button v-on:click="$emit('drop', courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
+                        <template v-for="course in courses">
+                            <li v-show="courseId === course._id">
+                                <div class="jumbotron jumbotron-fluid">
+                                    <div class="container">
+                                        <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
+
+                                        <h2 class="display-4">Name</h2>
+                                        <p class="lead">{{course.name}}</p>
+
+                                        <h2 class="display-4">Description</h2>
+                                        <p class="lead">{{course.description}}</p>
+
+                                        <h2 class="display-4">Professor</h2>
+                                        <p class="lead">{{course.prof}}</p>
+
+                                        <h2 class="display-4">Room</h2>
+                                        <p class="lead">{{course.room}}</p>
+
+                                        <button v-on:click="$emit('drop', courseId)" class="btn-small waves-effect waves-light" type="submit">Drop</button>
+                                    </div>
+                                </div>
                             </li>
                         </template>
-                        <hr />
                     </ul>
                 </div>`,
     props: ['me', 'courses']
@@ -119,11 +184,12 @@ const dropCourseComponent = {
 const editCourseComponent = {
     template: `<div>
                     <select class="browser-default" v-model="course">
+                        <option disabled value="">Choose your course to edit</option>
                         <option v-for="courseObj in courses" v-bind:value="courseObj">{{courseObj.dept}}{{courseObj.number}}-{{courseObj.section}}-{{courseObj.name}}</option>
                     </select>
                     <div v-show="course.dept">
                         <select class="browser-default" v-model="course.dept">
-                                <option disabled value="">course dept</option>
+                                <option disabled value="">Choose your course to edit</option>
                                 <option>CS</option>
                                 <option>ME</option>
                                 <option>BIOL</option>
@@ -340,6 +406,18 @@ const app = new Vue({
     el: '#demo-app',
     data: {
         loggedIn: false,
+        signingUp: false,
+        firstName: '',
+        lastName: '',
+        streetAddress: '',
+        city: '',
+        stateLocation: '',
+        zipCode: '',
+        email: '',
+        phoneNumber: '',
+        states: ["AK", "AL", "AR", "AS", "AZ", "CA", "CO", "CT", "DC", "DE", "FL", "GA", "GU", "HI", "IA", "ID", "IL", "IN", "KS",
+            "KY", "LA", "MA", "MD", "ME", "MI", "MN", "MO", "MS", "MT", "NC", "ND", "NE", "NH", "NJ", "NM", "NV", "NY", "OH", "OK", "OR",
+            "PA", "PR", "RI", "SC", "SD", "TN", "TX", "UT", "VA", "VI", "VT", "WA", "WI", "WV", "WY"],
         userName: '',
         password: '',
         failedName: '',
@@ -402,13 +480,31 @@ const app = new Vue({
 
             socket.emit('join-user', this.userName, this.password)
         },
+        toggleSignup: function () {
+            this.signingUp = true
+            this.userName = ''
+            this.password = ''
+        },
+        backOutSigningUp: function () {
+            this.signingUp = false
+            this.firstName = ''
+            this.lastName = ''
+            this.streetAddress = ''
+            this.city = ''
+            this.stateLocation = ''
+            this.zipCode = ''
+            this.email = ''
+            this.phoneNumber = ''
+            this.userName = ''
+            this.password = ''
+        },
         signupUser: function () {
             // Reject if user doesn't put name or password
-            if (!this.userName || !this.password) {
+            if (!this.firstName || !this.lastName || !this.streetAddress || !this.city || !this.stateLocation || !this.zipCode || !this.email || !this.phoneNumber || !this.userName || !this.password) {
                 return
             }
 
-            socket.emit('create-user', this.userName, this.password, this.admin)
+            socket.emit('create-user', this.firstName, this.lastName, this.streetAddress, this.city, this.zipCode, this.stateLocation, this.email, this.phoneNumber, this.userName, this.password, this.admin)
         },
         changeState: function (state) {
             this.state = state
@@ -625,6 +721,7 @@ const app = new Vue({
     },
     components: {
         'header-component': headerComponent,
+        'home-component': homeComponent,
         'course-row-component': courseButtonsComponent,
         'course-component': courseComponent,
         'searched-courses-component': searchedCoursesComponent,

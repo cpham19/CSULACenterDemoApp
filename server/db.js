@@ -257,12 +257,17 @@ const postAssignment = (courseId, assignment) => {
                 throw new Error('Assignment already exists')
             }
 
+            const date = new Date()
+            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
+            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const year = date.getFullYear()
+
             // Return an object if assignment doesnt exist
             return {
                 courseId: courseId,
                 title: assignment.title,
                 description: assignment.description,
-                date: new Date().getTime()
+                date: month + "/" + day + "/" + year
             }
         })
         // Create assignment from assignment object 
@@ -299,6 +304,11 @@ const postThread = (courseId, thread) => {
                 throw new Error('Thread already exists')
             }
 
+            const date = new Date()
+            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
+            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const year = date.getFullYear()
+
             // Return an object if post doesnt exist
             return {
                 courseId: courseId,
@@ -307,7 +317,7 @@ const postThread = (courseId, thread) => {
                 title: thread.title,
                 description: thread.description,
                 replies: [],
-                date: new Date().getTime()
+                date: month + "/" + day + "/" + year
             }
         })
         // Create thread from thread object 
@@ -344,13 +354,18 @@ const replyToThread = (reply) => {
                 throw new Error('Reply already exists')
             }
 
+            const date = new Date()
+            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
+            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const year = date.getFullYear()
+
             // Return an object if post doesnt exist
             return {
                 threadId: reply.threadId,
                 authorName: reply.author.name,
                 authorAvatar: reply.author.avatar,
                 description: reply.description,
-                date: new Date().getTime()
+                date: month + "/" + day + "/" + year
             }
         })
         .then(reply => Reply.create(reply))

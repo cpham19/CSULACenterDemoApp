@@ -12,6 +12,7 @@
   "dependencies": {
     "bcrypt": "^2.0.1",
     "express": "^4.16.3",
+    "flatpickr": "^4.5.2",
     "moment": "^2.22.0",
     "mongoose": "^5.0.15",
     "mongoose-simple-random": "^0.4.1",

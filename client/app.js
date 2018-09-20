@@ -272,7 +272,7 @@ const addAssignmentComponent = {
                     <button v-on:click="$emit('post', course._id, title, description)"
                         class="btn-small waves-effect waves-light" type="submit">Post</button>
                 </div>`,
-    props: ['course', 'title', 'description']
+    props: ['course', 'due', 'title', 'description']
 }
 
 const editAssignmentComponent = {
@@ -447,6 +447,7 @@ const app = new Vue({
         addingAssignment: false,
         edittingAssignment: false,
         courseOfAssignmentToAdd: {},
+        assignmentDueDate: '',
         assignmentTitle: '',
         assignmentDescription: '',
         newCourse: {},
@@ -736,7 +737,7 @@ const app = new Vue({
         'forum-component': forumComponent,
         'add-thread-component': addThreadComponent,
         'edit-thread-component': editThreadComponent,
-        'thread-component': threadComponent
+        'thread-component': threadComponent,
     }
 })
 

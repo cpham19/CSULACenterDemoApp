@@ -95,27 +95,29 @@ const searchedCoursesComponent = {
 }
 
 const addCourseComponent = {
-    template: `<div>
-                    <select class="browser-default" v-model="dept">
-                        <option disabled value="">course dept</option>
-                        <option>CS</option>
-                        <option>ME</option>
-                        <option>BIOL</option>
-                        <option>PHYS</option>
-                        <option>CHEM</option>
-                        <option>COMM</option>
-                        <option>CE</option>
-                    </select>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <select class="browser-default" v-model="dept">
+                            <option disabled value="">course dept</option>
+                            <option>CS</option>
+                            <option>ME</option>
+                            <option>BIOL</option>
+                            <option>PHYS</option>
+                            <option>CHEM</option>
+                            <option>COMM</option>
+                            <option>CE</option>
+                        </select>
 
-                    <input v-model="name" placeholder="course name" type="text">
-                    <input v-model="number" placeholder="course number" type="text">
-                    <input v-model="section" placeholder="course section" type="text">
-                    <textarea v-model="description" placeholder="course description"></textarea>
-                    <input v-model="unit" placeholder="course unit" type="text">
-                    <input v-model="prof" placeholder="course professor" type="text">
-                    <input v-model="room" placeholder="course room" type="text">
-                    <button v-on:click="$emit('add', dept, name, number, section, description, unit, prof, room)" class="btn-small waves-effect waves-light" type="submit">Add</button>
-                    <button v-on:click="$emit('discard')" class="btn-small waves-effect waves-light" type="submit">Discard</button>
+                        <input v-model="name" placeholder="course name" type="text">
+                        <input v-model="number" placeholder="course number" type="text">
+                        <input v-model="section" placeholder="course section" type="text">
+                        <textarea v-model="description" placeholder="course description"></textarea>
+                        <input v-model="unit" placeholder="course unit" type="text">
+                        <input v-model="prof" placeholder="course professor" type="text">
+                        <input v-model="room" placeholder="course room" type="text">
+                        <button v-on:click="$emit('add', dept, name, number, section, description, unit, prof, room)" class="btn-small waves-effect waves-light" type="submit">Add</button>
+                        <button v-on:click="$emit('discard')" class="btn-small waves-effect waves-light" type="submit">Discard</button>
+                    </div>
                 </div>`,
     props: ['dept', 'name', 'number', 'section', 'description', 'unit', 'prof', 'room']
 }
@@ -182,31 +184,33 @@ const dropCourseComponent = {
 }
 
 const editCourseComponent = {
-    template: `<div>
-                    <select class="browser-default" v-model="course">
-                        <option disabled value="">Choose your course to edit</option>
-                        <option v-for="courseObj in courses" v-bind:value="courseObj">{{courseObj.dept}}{{courseObj.number}}-{{courseObj.section}}-{{courseObj.name}}</option>
-                    </select>
-                    <div v-show="course.dept">
-                        <select class="browser-default" v-model="course.dept">
-                                <option disabled value="">Choose your course to edit</option>
-                                <option>CS</option>
-                                <option>ME</option>
-                                <option>BIOL</option>
-                                <option>PHYS</option>
-                                <option>CHEM</option>
-                                <option>COMM</option>
-                                <option>CE</option>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <select class="browser-default" v-model="course">
+                            <option disabled value="">Choose your course to edit</option>
+                            <option v-for="courseObj in courses" v-bind:value="courseObj">{{courseObj.dept}}{{courseObj.number}}-{{courseObj.section}}-{{courseObj.name}}</option>
                         </select>
-                        <input v-model="course.name" placeholder="course name" type="text">
-                        <input v-model="course.number" placeholder="course number" type="text">
-                        <input v-model="course.section" placeholder="course section" type="text">
-                        <textarea v-model="course.description" placeholder="course description"></textarea>
-                        <input v-model="course.unit" placeholder="course unit" type="text">
-                        <input v-model="course.prof" placeholder="course professor" type="text">
-                        <input v-model="course.room" placeholder="course room" type="text">
-                        <button v-on:click="$emit('edit', course)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
-                        <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        <div v-show="course.dept">
+                            <select class="browser-default" v-model="course.dept">
+                                    <option disabled value="">Choose your course to edit</option>
+                                    <option>CS</option>
+                                    <option>ME</option>
+                                    <option>BIOL</option>
+                                    <option>PHYS</option>
+                                    <option>CHEM</option>
+                                    <option>COMM</option>
+                                    <option>CE</option>
+                            </select>
+                            <input v-model="course.name" placeholder="course name" type="text">
+                            <input v-model="course.number" placeholder="course number" type="text">
+                            <input v-model="course.section" placeholder="course section" type="text">
+                            <textarea v-model="course.description" placeholder="course description"></textarea>
+                            <input v-model="course.unit" placeholder="course unit" type="text">
+                            <input v-model="course.prof" placeholder="course professor" type="text">
+                            <input v-model="course.room" placeholder="course room" type="text">
+                            <button v-on:click="$emit('edit', course)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
+                            <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        </div>
                     </div>
                 </div>`,
     props: ['course', 'courses']
@@ -234,62 +238,78 @@ const courseComponent = {
 const assignmentComponent = {
     template: `<div>
                     <template v-for="course in courses">
-                        <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('add', course)"
-                                class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                        <table v-show="course.prof === me.name">
-                            <thead>
-                                <tr>
-                                    <th>Assignment</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="assignment in assignments">
-                                    <td v-show="assignment.courseId === course._id">
-                                        <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
-                                    </td>
-                                    <td v-show="assignment.courseId === course._id">
-                                        <button v-on:click="$emit('edit', assignment)" class="button-align-left"
-                                            type="submit">Edit</button>
-                                        <button v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="jumbotron jumbotron-fluid">
+                            <div class="container">
+                                <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('add', course)"
+                                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                                <table v-show="course.prof === me.name">
+                                    <thead>
+                                        <tr>
+                                            <th>Assignment</th>
+                                            <th>Due Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="assignment in assignments">
+                                            <td v-show="assignment.courseId === course._id">
+                                                <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
+                                            </td>
+                                            <td v-show="assignment.courseId === course._id">
+                                                <p class="lead">{{assignment.dueDate}}</p>
+                                            </td>
+                                            <td v-show="assignment.courseId === course._id">
+                                                <button v-on:click="$emit('edit', assignment)" class="button-align-left"
+                                                    type="submit">Edit</button>
+                                                <button v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </template>
                 </div>`,
     props: ['me', 'courses', 'assignments']
 }
 
 const addAssignmentComponent = {
-    template: `<div>
-                    <h1>Adding assignment to
-                        {{course.dept}}{{course.number}}-{{course.section}}
-                        {{course.name}}
-                    </h1>
-                    <input v-model="title" placeholder="title of assignment" type="text">
-                    <textarea v-model="description" placeholder="description of assignment"></textarea>
-                    <button v-on:click="$emit('post', course._id, title, description)"
-                        class="btn-small waves-effect waves-light" type="submit">Post</button>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <h1 class="display-4">Adding assignment to
+                            {{course.dept}}{{course.number}}-{{course.section}}
+                            {{course.name}}
+                        </h1>
+                        <input v-model="date" type="date" placeholder="select a due date">
+                        <input v-model="title" placeholder="title of assignment" type="text">
+                        <textarea v-model="description" placeholder="description of assignment"></textarea>
+                        <button v-on:click="$emit('post', course._id, date, title, description)"
+                            class="btn-small waves-effect waves-light" type="submit">Post</button>
+                    </div>
                 </div>`,
-    props: ['course', 'due', 'title', 'description']
+    props: ['course', 'date', 'title', 'description']
 }
 
 const editAssignmentComponent = {
-    template: `<div>
-                    <input v-model="assignment.title" placeholder="title of assignment" type="text">
-                    <textarea v-model="assignment.description" placeholder="description of assignment"></textarea>
-                    <button v-on:click="$emit('edit', assignment)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
-                    <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <input v-model="assignment.title" placeholder="title of assignment" type="text">
+                        <textarea v-model="assignment.description" placeholder="description of assignment"></textarea>
+                        <button v-on:click="$emit('edit', assignment)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                        <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                    </div>
                 </div>`,
     props: ['assignment',]
 }
 
 const viewAssignmentComponent = {
-    template: `<div>
-                    <button v-on:click="$emit('back')" type="submit">Back</button>
-                    <h1>{{assignment.title}}</h1>
-                    <p>{{assignment.description}}</p>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <button v-on:click="$emit('back')" type="submit">Back</button>
+                        <h1 class="display-4">{{assignment.title}}</h1>
+                        <p class="lead">Due Date: {{assignment.dueDate}}</p>
+                        <p class="lead">{{assignment.description}}</p>
+                    </div>
                 </div>`,
     props: ['assignment',]
 }
@@ -297,105 +317,119 @@ const viewAssignmentComponent = {
 const forumComponent = {
     template: `<div>
                     <template v-for="course in courses">
-                        <h1>{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('create', course)"
-                                class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Thread</th>
-                                    <th>Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="thread in threads">
-                                    <td v-show="thread.courseId === course._id"><a v-on:click="$emit('view', thread)">{{thread.title}}</a></td>
-                                    <td v-show="thread.courseId === course._id">
-                                        <button v-on:click="$emit('remove', thread)" class="button-align-left" type="submit">Remove</button>
-                                        <button v-on:click="$emit('edit', thread)" class="button-align-left" type="submit">Edit</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <div class="jumbotron jumbotron-fluid">
+                            <div class="container">
+                                <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('create', course)"
+                                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Thread</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr v-for="thread in threads">
+                                            <td v-show="thread.courseId === course._id"><a v-on:click="$emit('view', thread)">{{thread.title}}</a></td>
+                                            <td><p class="lead">{{thread.date}}</p></td>
+                                            <td v-show="thread.courseId === course._id">
+                                                <button v-on:click="$emit('edit', thread)" class="button-align-left" type="submit">Edit</button>
+                                                <button v-on:click="$emit('remove', thread)" class="button-align-left" type="submit">Remove</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                     </template>
                 </div>`,
     props: ['courses', 'threads']
 }
 
 const addThreadComponent = {
-    template: `<div>
-                    <h1>Adding thread to
-                        {{course.dept}}{{course.number}}-{{course.section}} {{course.name}}
-                    </h1>
-                    <input v-model="title" placeholder="title of thread" type="text">
-                    <textarea v-model="description" placeholder="description of thread"></textarea>
-                    <button v-on:click="$emit('post', course._id, me, title, description)" class="btn-small waves-effect waves-light" type="submit">Post</button>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <h1 class="display-4">Adding thread to
+                            {{course.dept}}{{course.number}}-{{course.section}} {{course.name}}
+                        </h1>
+                        <input v-model="title" placeholder="title of thread" type="text">
+                        <textarea v-model="description" placeholder="description of thread"></textarea>
+                        <button v-on:click="$emit('post', course._id, me, title, description)" class="btn-small waves-effect waves-light" type="submit">Post</button>
+                    </div>
                 </div>`,
     props: ['course', 'title', 'description', 'me']
 }
 
 const editThreadComponent = {
-    template: `<div>
-                    <input v-model="thread.title" placeholder="title of thread" type="text">
-                    <textarea v-model="thread.description" placeholder="description of thread"></textarea>
-                    <button v-on:click="$emit('edit', newThread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
-                    <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <input v-model="thread.title" placeholder="title of thread" type="text">
+                        <textarea v-model="thread.description" placeholder="description of thread"></textarea>
+                        <button v-on:click="$emit('edit', newThread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                        <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                    </div>
                 </div>`,
     props: ['thread']
 }
 
 const threadComponent = {
-    template: `<div>
-                    <button v-on:click="$emit('back_thread')" type="submit">Back</button>
-                    <br />
-                    <br />
-
-                    <div v-show="editting">
-                        <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
-                        <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
-                        <button v-on:click="$emit('back_reply')" class="btn-small waves-effect waves-light" type="submit">Back</button>
-                    </div>
-
-                    <div v-show="!editting">
-                        <strong>{{thread.title}}</strong>
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container">
+                        <button v-on:click="$emit('back_thread')" type="submit">Back</button>
                         <br />
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Message</th>
-                                    <th>Author</th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <!-- First row is the author and his message -->
-                                <tr>
-                                    <td class="post-description">{{thread.description}}</td>
-                                    <td class="post-author">
-                                        <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
-                                        {{thread.authorName}}
-                                    </td>
-                                </tr>
-
-                                <!-- Additional rows for replies and their authors -->
-                                <tr v-for="reply in replies">
-                                    <td class="post-description" v-show="reply.threadId === thread._id">{{reply.description}}</td>
-                                    <td class="post-author" v-show="reply.threadId === thread._id">
-                                        <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
-                                        {{reply.authorName}}<br />
-                                        <button v-on:click="$emit('edit', reply)" type="submit"
-                                            v-show="!editting">Edit</button>
-                                        <button v-on:click="$emit('delete', reply)" type="submit"
-                                            v-show="!editting">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-
                         <br />
 
-                        <!-- For creating a new reply to a thread -->
-                        <textarea v-model="new_reply" placeholder="description of reply"></textarea>
-                        <button v-on:click="$emit('reply', thread, me, new_reply)">Reply</button>
+                        <div v-show="editting">
+                            <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
+                            <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                            <button v-on:click="$emit('back_reply')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        </div>
+
+                        <div v-show="!editting">
+                            <h1 class="display-4">{{thread.title}}</h1>
+                            <br />
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Message</th>
+                                        <th>Author</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <!-- First row is the author and his message -->
+                                    <tr>
+                                        <td class="post-description">{{thread.description}}</td>
+                                        <td class="post-author">
+                                            {{thread.date}}<br/>
+                                            <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
+                                            {{thread.authorName}}
+                                        </td>
+                                    </tr>
+
+                                    <!-- Additional rows for replies and their authors -->
+                                    <tr v-for="reply in replies">
+                                        <td class="post-description" v-show="reply.threadId === thread._id">{{reply.description}}</td>
+                                        <td class="post-author" v-show="reply.threadId === thread._id">
+                                            {{reply.date}}<br/>
+                                            <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
+                                            {{reply.authorName}}<br />
+                                            <button v-on:click="$emit('edit', reply)" type="submit"
+                                                v-show="!editting">Edit</button>
+                                            <button v-on:click="$emit('delete', reply)" type="submit"
+                                                v-show="!editting">Delete</button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <br />
+
+                            <!-- For creating a new reply to a thread -->
+                            <textarea v-model="new_reply" placeholder="description of reply"></textarea>
+                            <button v-on:click="$emit('reply', thread, me, new_reply)">Reply</button>
+                        </div>
                     </div>
                 </div>`,
     props: ['replies', 'thread', 'editting', 'editted_reply', 'new_reply', 'me']
@@ -621,12 +655,18 @@ const app = new Vue({
             this.edittingAssignment = false
             this.courseOfAssignmentToAdd = course
         },
-        postAssignment: function (courseId, assignmentTitle, assignmentDescription) {
-            if (!assignmentTitle || !assignmentDescription) {
+        postAssignment: function (courseId, date, assignmentTitle, assignmentDescription) {
+            if (!date || !assignmentTitle || !assignmentDescription) {
                 return
             }
 
-            const assignment = { title: assignmentTitle, description: assignmentDescription }
+            const year = date.substring(0, 4)
+            const month = date.substring(5,7)
+            const day = date.substring(8, 10)
+
+            const formattedDate = month + "/" + day + "/" + year
+
+            const assignment = {dueDate: formattedDate, title: assignmentTitle, description: assignmentDescription }
             socket.emit('post-assignment', courseId, assignment)
         },
         removeAssignment: function (assignment) {

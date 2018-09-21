@@ -43,6 +43,7 @@ const CourseSchema = new Mongoose.Schema({
 // Schema for Assignments
 const AssignmentSchema = new Mongoose.Schema({
     courseId: String,
+    dueDate: String,
     title: String,
     description: String,
 }, { strict: false })
@@ -258,16 +259,18 @@ const postAssignment = (courseId, assignment) => {
             }
 
             const date = new Date()
-            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
-            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const month = ('0' + (date.getMonth() + 1)).slice(-2)
+            const day = ('0' + date.getDate()).slice(-2)
             const year = date.getFullYear()
+            const formattedDate = month + "/" + day + "/" + year
 
             // Return an object if assignment doesnt exist
             return {
                 courseId: courseId,
+                dueDate: assignment.dueDate,
                 title: assignment.title,
                 description: assignment.description,
-                date: month + "/" + day + "/" + year
+                date: formattedDate
             }
         })
         // Create assignment from assignment object 
@@ -305,9 +308,10 @@ const postThread = (courseId, thread) => {
             }
 
             const date = new Date()
-            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
-            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const month = ('0' + (date.getMonth() + 1)).slice(-2)
+            const day = ('0' + date.getDate()).slice(-2)
             const year = date.getFullYear()
+            const formattedDate = month + "/" + day + "/" + year
 
             // Return an object if post doesnt exist
             return {
@@ -317,7 +321,7 @@ const postThread = (courseId, thread) => {
                 title: thread.title,
                 description: thread.description,
                 replies: [],
-                date: month + "/" + day + "/" + year
+                date: formattedDate
             }
         })
         // Create thread from thread object 
@@ -355,9 +359,10 @@ const replyToThread = (reply) => {
             }
 
             const date = new Date()
-            const month = (date.getMonth().length == 1 ? '0' + date.getMonth() : date.getMonth())
-            const day = (date.getDate().length == 1 ? '0' + date.getDate() : date.getDate())
+            const month = ('0' + (date.getMonth() + 1)).slice(-2)
+            const day = ('0' + date.getDate()).slice(-2)
             const year = date.getFullYear()
+            const formattedDate = month + "/" + day + "/" + year
 
             // Return an object if post doesnt exist
             return {
@@ -365,7 +370,7 @@ const replyToThread = (reply) => {
                 authorName: reply.author.name,
                 authorAvatar: reply.author.avatar,
                 description: reply.description,
-                date: month + "/" + day + "/" + year
+                date: formattedDate
             }
         })
         .then(reply => Reply.create(reply))

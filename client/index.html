@@ -20,9 +20,6 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp"
         crossorigin="anonymous">
 
-    <!-- flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
     <style>
         [v-cloak] {
             display: none;
@@ -158,7 +155,7 @@
                 <!-- Adding assignments -->
                 <div v-show="addingAssignment">
                     <add-assignment-component v-on:post="postAssignment" v-bind:course="courseOfAssignmentToAdd"
-                         v-bind:title="assignmentTitle" v-bind:description="assignmentDescription">
+                         v-bind:date="assignmentDueDate" v-bind:title="assignmentTitle" v-bind:description="assignmentDescription">
                     </add-assignment-component>
                 </div>
 
@@ -210,8 +207,6 @@
     <script type="text/javascript" src="https://unpkg.com/socket.io-client@2.1.0/dist/socket.io.js"></script>
     <script type="text/javascript" src="app.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-Usage
 </body>
 
 </html>

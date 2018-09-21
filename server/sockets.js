@@ -19,7 +19,7 @@ module.exports = (server, db) => {
                 // success
                 .then(created => io.emit('successful-join', created))
                 // error
-                .catch(err => io.emit('failed-join', 'Failed to create account'))
+                .catch(err => io.emit('failed-join', {name: userName}))
         })
 
         socket.on('join-user', (userName, password) => {
@@ -28,7 +28,7 @@ module.exports = (server, db) => {
                 // success
                 .then(created => io.emit('successful-join', created))
                 // error
-                .catch(err => io.emit('failed-join', 'Failed to join'))
+                .catch(err => io.emit('failed-join', {name: userName}))
         })
 
         socket.on('disconnect', () => {

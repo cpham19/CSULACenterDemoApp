@@ -55,6 +55,14 @@
                 <input v-model="phoneNumber" placeholder="phone number" type="text" class="u-full-width">
                 <input v-model="userName" placeholder="username" type="text" class="u-full-width">
                 <input v-model="password" placeholder="password" type="password" class="u-full-width">
+                <div class="switch">
+                    <label>
+                      Student
+                      <input type="checkbox" v-model="admin">
+                      <span class="lever"></span>
+                      Admin (Professor)
+                    </label>
+                </div>
                 <button v-on:click="signupUser" :disabled="!firstName || !lastName || !streetAddress || !city || !stateLocation || !zipCode || !email || !phoneNumber || !userName || !password"
                     class="btn-small waves-effect waves-light" type="submit">Sign
                     Up</button>
@@ -91,7 +99,7 @@
             <div v-show="state === 'Courses'">
 
                 <!-- Toggle between Searching Courses and Add Courses screen -->
-                <course-row-component v-on:change="changeCourseState"></course-row-component>
+                <course-row-component v-bind:me="me" v-on:change="changeCourseState"></course-row-component>
                 <br />
                 <br />
                 <br />
@@ -115,7 +123,7 @@
                     <input type="text" v-model="courseNumber" placeholder="course number" v-on:keyup="searchCourse(courseDept, courseNumber)">
 
                     <!-- search results component -->
-                    <searched-courses-component v-on:enroll="enrollCourse" v-bind:courses="searchedCourses"></searched-courses-component>
+                    <searched-courses-component v-on:enroll="enrollCourse" v-bind:courses="searchedCourses" v-bind:me="me"></searched-courses-component>
                 </div>
 
                 <!-- For Adding Courses -->
@@ -174,7 +182,7 @@
                 <!-- Display forums -->
                 <div v-show="!addingThread && !edittingThread && !viewingThread">
                     <forum-component v-on:create="createThread" v-on:view="viewThread" v-on:remove="removeThread"
-                        v-on:edit="selectThreadToEdit" v-bind:courses="courses" v-bind:threads="threads"></forum-component>
+                        v-on:edit="selectThreadToEdit" v-bind:courses="courses" v-bind:threads="threads" v-bind:me="me"></forum-component>
                 </div>
 
                 <!-- Adding threads -->

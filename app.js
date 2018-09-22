@@ -49,20 +49,20 @@ const courseButtonsComponent = {
                     <div class="column">
                         <button class="block" v-on:click="$emit('change', 'search')" type="submit">Search Courses</button>
                     </div>
-                    <div class="column">
+                    <div class="column" v-show="me.admin">
                         <button class="block" v-on:click="$emit('change', 'add')" type="submit">Add Course</button>
                     </div>
                     <div class="column">
                         <button class="block" v-on:click="$emit('change', 'drop')" type="submit">Drop Course</button>
                     </div>
-                    <div class="column">
+                    <div class="column" v-show="me.admin">
                         <button class="block" v-on:click="$emit('change', 'remove')" type="submit">Remove Course</button>
                     </div>
-                    <div class="column">
+                    <div class="column" v-show="me.admin">
                         <button class="block" v-on:click="$emit('change', 'edit')" type="submit">Edit Course</button>
                     </div>
                 </div>`,
-    props: []
+    props: ['me']
 }
 
 const searchedCoursesComponent = {
@@ -85,13 +85,13 @@ const searchedCoursesComponent = {
                                     <h2 class="display-4">Room</h2>
                                     <p class="lead">{{course.room}}</p>
 
-                                    <button v-on:click="$emit('enroll', course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
+                                    <button v-show="!me.admin" v-on:click="$emit('enroll', course._id)" class="btn-small waves-effect waves-light" type="submit">Enroll</button>
                                 </div>
                             </div>
                         </li>
                     </ul>
                 </div>`,
-    props: ['courses']
+    props: ['courses', 'me']
 }
 
 const addCourseComponent = {
@@ -237,38 +237,76 @@ const courseComponent = {
 
 const assignmentComponent = {
     template: `<div>
-                    <template v-for="course in courses">
-                        <div class="jumbotron jumbotron-fluid">
-                            <div class="container">
-                                <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('add', course)"
-                                        class="btn-small waves-effect waves-light" type="submit">+</button></h1>
-                                <table v-show="course.prof === me.name">
-                                    <thead>
-                                        <tr>
-                                            <th>Assignment</th>
-                                            <th>Due Date</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-for="assignment in assignments">
-                                            <td v-show="assignment.courseId === course._id">
-                                                <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
-                                            </td>
-                                            <td v-show="assignment.courseId === course._id">
-                                                <p class="lead">{{assignment.dueDate}}</p>
-                                            </td>
-                                            <td v-show="assignment.courseId === course._id">
-                                                <button v-on:click="$emit('edit', assignment)" class="button-align-left"
-                                                    type="submit">Edit</button>
-                                                <button v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                    <div v-show="me.admin">
+                        <template v-for="course in courses">
+                            <div class="jumbotron jumbotron-fluid">
+                                <div class="container">
+                                    <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-show="course.prof === me.name" v-on:click="$emit('add', course)"
+                                            class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                                    <table>
+                                        <thead>
+                                            <tr>
+                                                <th>Assignment</th>
+                                                <th>Due Date</th>
+                                                <th v-show="course.prof === me.name">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr v-for="assignment in assignments">
+                                                <td v-show="assignment.courseId === course._id">
+                                                    <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
+                                                </td>
+                                                <td v-show="assignment.courseId === course._id">
+                                                    <p class="lead">{{assignment.dueDate}}</p>
+                                                </td>
+                                                <td v-show="assignment.courseId === course._id">
+                                                    <button v-show="course.prof === me.name" v-on:click="$emit('edit', assignment)" class="button-align-left"
+                                                        type="submit">Edit</button>
+                                                    <button v-show="course.prof === me.name" v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
-                        </div>
-                    </template>
+                        </template>
+                    </div>
+                    <div v-show="!me.admin">
+                        <template v-for="courseId in me.courses">
+                            <template v-for="course in courses">
+                                <div class="jumbotron jumbotron-fluid" v-show="courseId === course._id">
+                                    <div class="container">
+                                        <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-show="course.prof === me.name" v-on:click="$emit('add', course)"
+                                                class="btn-small waves-effect waves-light" type="submit">+</button></h1>
+                                        <table>
+                                            <thead>
+                                                <tr>
+                                                    <th>Assignment</th>
+                                                    <th>Due Date</th>
+                                                    <th v-show="course.prof === me.name">Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr v-for="assignment in assignments">
+                                                    <td v-show="assignment.courseId === course._id">
+                                                        <a v-on:click="$emit('view', assignment)">{{assignment.title}}</a>
+                                                    </td>
+                                                    <td v-show="assignment.courseId === course._id">
+                                                        <p class="lead">{{assignment.dueDate}}</p>
+                                                    </td>
+                                                    <td v-show="assignment.courseId === course._id">
+                                                        <button v-show="course.prof === me.name" v-on:click="$emit('edit', assignment)" class="button-align-left"
+                                                            type="submit">Edit</button>
+                                                        <button v-show="course.prof === me.name" v-on:click="$emit('remove', assignment)" class="button-align-left" type="submit">Remove</button>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </template>
+                        </template>
+                    </div>
                 </div>`,
     props: ['me', 'courses', 'assignments']
 }
@@ -326,14 +364,14 @@ const forumComponent = {
                                         <tr>
                                             <th>Thread</th>
                                             <th>Date</th>
-                                            <th>Action</th>
+                                            <th v-show="course.prof === me.name || me.admin">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="thread in threads">
                                             <td v-show="thread.courseId === course._id"><a v-on:click="$emit('view', thread)">{{thread.title}}</a></td>
-                                            <td><p class="lead">{{thread.date}}</p></td>
-                                            <td v-show="thread.courseId === course._id">
+                                            <td v-show="thread.courseId === course._id"><p class="lead">{{thread.date}}</p></td>
+                                            <td v-show="thread.courseId === course._id && thread.authorName === me.name || me.admin">
                                                 <button v-on:click="$emit('edit', thread)" class="button-align-left" type="submit">Edit</button>
                                                 <button v-on:click="$emit('remove', thread)" class="button-align-left" type="submit">Remove</button>
                                             </td>
@@ -344,7 +382,7 @@ const forumComponent = {
                         </div>
                     </template>
                 </div>`,
-    props: ['courses', 'threads']
+    props: ['courses', 'threads', 'me']
 }
 
 const addThreadComponent = {
@@ -415,9 +453,9 @@ const threadComponent = {
                                             {{reply.date}}<br/>
                                             <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
                                             {{reply.authorName}}<br />
-                                            <button v-on:click="$emit('edit', reply)" type="submit"
+                                            <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('edit', reply)" type="submit"
                                                 v-show="!editting">Edit</button>
-                                            <button v-on:click="$emit('delete', reply)" type="submit"
+                                            <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('delete', reply)" type="submit"
                                                 v-show="!editting">Delete</button>
                                         </td>
                                     </tr>
@@ -848,7 +886,7 @@ socket.on('successful-enroll-course', courseId => {
         // Filter the search results after enrolling a course
         app.searchedCourses = app.searchedCourses.filter(courseObj => !(courseObj._id === courseId))
 
-        console.log("DROPPED THE COURSE: " + courseId)
+        console.log("ENROLLED THE COURSE: " + courseId)
     }
 })
 

@@ -364,17 +364,12 @@ const forumComponent = {
                                         <tr>
                                             <th>Thread</th>
                                             <th>Date</th>
-                                            <th v-show="course.prof === me.name || me.admin">Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr v-for="thread in threads">
                                             <td v-show="thread.courseId === course._id"><a v-on:click="$emit('view', thread)">{{thread.title}}</a></td>
                                             <td v-show="thread.courseId === course._id"><p class="lead">{{thread.date}}</p></td>
-                                            <td v-show="thread.courseId === course._id && thread.authorName === me.name || me.admin">
-                                                <button v-on:click="$emit('edit', thread)" class="button-align-left" type="submit">Edit</button>
-                                                <button v-on:click="$emit('remove', thread)" class="button-align-left" type="submit">Remove</button>
-                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -404,7 +399,7 @@ const editThreadComponent = {
                     <div class="container">
                         <input v-model="thread.title" placeholder="title of thread" type="text">
                         <textarea v-model="thread.description" placeholder="description of thread"></textarea>
-                        <button v-on:click="$emit('edit', newThread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                        <button v-on:click="$emit('edit', thread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
                         <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
                     </div>
                 </div>`,
@@ -442,7 +437,9 @@ const threadComponent = {
                                         <td class="post-author">
                                             {{thread.date}}<br/>
                                             <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
-                                            {{thread.authorName}}
+                                            {{thread.authorName}}<br/>
+                                            <button v-show="thread.authorName === me.name || me.admin" v-on:click="$emit('edit', thread)" type="submit">Edit</button><br/>
+                                            <button v-show="thread.authorName === me.name || me.admin" v-on:click="$emit('remove', thread)" type="submit">Remove</button>
                                         </td>
                                     </tr>
 
@@ -454,7 +451,7 @@ const threadComponent = {
                                             <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
                                             {{reply.authorName}}<br />
                                             <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('edit', reply)" type="submit"
-                                                v-show="!editting">Edit</button>
+                                                v-show="!editting">Edit</button><br/>
                                             <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('delete', reply)" type="submit"
                                                 v-show="!editting">Delete</button>
                                         </td>
@@ -1021,6 +1018,8 @@ socket.on('successful-remove-thread', thread => {
         })
 
         app.threads = app.threads.filter(threadObj => !(threadObj._id === thread._id))
+
+        app.viewingThread = false
 
 
         console.log("REMOVED THE THREAD: " + thread._id)

@@ -181,8 +181,7 @@
             <div v-show="state === 'Forums'">
                 <!-- Display forums -->
                 <div v-show="!addingThread && !edittingThread && !viewingThread">
-                    <forum-component v-on:create="createThread" v-on:view="viewThread" v-on:remove="removeThread"
-                        v-on:edit="selectThreadToEdit" v-bind:courses="courses" v-bind:threads="threads" v-bind:me="me"></forum-component>
+                    <forum-component v-on:create="createThread" v-on:view="viewThread" v-bind:courses="courses" v-bind:threads="threads" v-bind:me="me"></forum-component>
                 </div>
 
                 <!-- Adding threads -->
@@ -198,7 +197,7 @@
 
                 <!-- Viewing threads -->
                 <div v-show="viewingThread">
-                    <thread-component v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread"
+                    <thread-component v-on:remove="removeThread" v-on:edit="selectThreadToEdit" v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread"
                         v-on:back_reply="backOutEdittingReply" v-on:delete="deleteReply" v-on:reply="replyToThread"
                         v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView"
                         v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply" v-bind:new_reply="newReply"

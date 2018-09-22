@@ -6,7 +6,7 @@ const
     app = express(),
     server = require('http').Server(app)
 
-app.use(express.static('../client'))
+app.use(express.static('./'))
 const db = require('./db')
 require('./sockets')(server, db)
 

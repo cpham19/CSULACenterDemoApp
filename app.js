@@ -435,7 +435,6 @@ const threadComponent = {
     props: ['replies', 'thread', 'editting', 'editted_reply', 'new_reply', 'me']
 }
 
-
 const app = new Vue({
     el: '#demo-app',
     data: {
@@ -500,10 +499,7 @@ const app = new Vue({
         newReply: '',
         edittingReply: false,
         replyToEdit: {},
-    },
-    created: function () {
-        // Unload resources after closing tab or browser
-        document.addEventListener('beforeunload', this.handler)
+        currentRoute: window.location.pathname
     },
     methods: {
         handler: function handler(event) { },

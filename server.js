@@ -25,7 +25,7 @@ app.get('/', function(req, res) {
 });
 
 // database
-const db = require('./db')
+const db = require('./db/db')
 
 require('./sockets')(server, db)
 

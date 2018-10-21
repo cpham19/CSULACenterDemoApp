@@ -3,7 +3,7 @@ const socket = io()
 const headerComponent = {
     template: `<div>
                     <div class="header-left">
-                        <img src="img/csula-logo.png" class="logo" width="100px" height="100px">
+                        <img src="/img/csula-logo.png" class="logo" width="100px" height="100px">
                     </div>
     
                     <div class="header-right">
@@ -143,7 +143,7 @@ const removeCourseComponent = {
                                     <h2 class="display-4">Room</h2>
                                     <p class="lead">{{course.room}}</p>
                                     
-                                    <button v-on:click="$emit('remove', course._id)" class="btn-small waves-effect waves-light" type="submit">Remove</button></p>
+                                    <button v-on:click="$emit('remove', course._id)" class="btn-small waves-effect waves-light" type="submit">Remove</button>
                                 </div>
                             </div>
                         </li>
@@ -533,8 +533,7 @@ const app = new Vue({
         threadToView: {},
         newReply: '',
         edittingReply: false,
-        replyToEdit: {},
-        currentRoute: window.location.pathname
+        replyToEdit: {}
     },
     methods: {
         handler: function handler(event) { },

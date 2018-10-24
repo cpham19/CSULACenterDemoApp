@@ -67,6 +67,7 @@
                     class="btn-small waves-effect waves-light" type="submit">Sign
                     Up</button>
                 <button v-on:click="backOutSigningUp" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                <div v-show="failedAdding">{{error}}</div>
             </div>
 
             <div class="failed" v-show='failedName'>
@@ -130,7 +131,7 @@
                 <div v-show="add">
                     <add-course-component v-on:add="addCourse" v-bind:dept="courseDept" v-bind:name="courseName"
                         v-bind:number="courseNumber" v-bind:section="courseSection" v-bind:description="courseDescription"
-                        v-bind:unit="courseUnit" v-bind:prof="courseProf" v-bind:room="courseRoom"></add-course-component>
+                        v-bind:unit="courseUnit" v-bind:prof="courseProf" v-bind:room="courseRoom" v-bind:failed="failedAdding" v-bind:error="error"></add-course-component>
                 </div>
 
                 <!-- Dropping Courses -->
@@ -146,7 +147,7 @@
                 <!-- Editting Courses -->
                 <div v-show="edit">
                     <edit-course-component v-on:edit="editCourse" v-on:back="backOutEdittingCourse" v-bind:course="newCourse"
-                        v-bind:courses="courses"></edit-course-component>
+                        v-bind:courses="courses" v-bind:failed="failedEditting" v-bind:error="error"></edit-course-component>
                 </div>
             </div>
 
@@ -161,14 +162,14 @@
                 <!-- Adding assignments -->
                 <div v-show="addingAssignment">
                     <add-assignment-component v-on:post="postAssignment" v-bind:course="courseOfAssignmentToAdd"
-                         v-bind:date="assignmentDueDate" v-bind:title="assignmentTitle" v-bind:description="assignmentDescription">
+                         v-bind:date="assignmentDueDate" v-bind:title="assignmentTitle" v-bind:description="assignmentDescription" v-bind:failed="failedAdding" v-bind:error="error">
                     </add-assignment-component>
                 </div>
 
                 <!-- Editting assignments -->
                 <div v-show="edittingAssignment">
                     <edit-assignment-component v-on:edit="editAssignment" v-on:back="backOutEdittingAssignment"
-                        v-bind:assignment="newAssignment"></edit-assignment-component>
+                        v-bind:assignment="newAssignment" v-bind:failed="failedEditting" v-bind:error="error"></edit-assignment-component>
                 </div>
 
                 <!-- Viewing assignments -->
@@ -187,21 +188,24 @@
                 <!-- Adding threads -->
                 <div v-show="addingThread">
                     <add-thread-component v-on:post="postThread" v-bind:course="courseOfThreadToAdd" v-bind:title="threadTitle"
-                        v-bind:description="threadDescription" v-bind:me="me"></add-thread-component>
+                        v-bind:description="threadDescription" v-bind:me="me" v-bind:failed="failedAdding" v-bind:error="error"></add-thread-component>
                 </div>
 
                 <!-- Editting threads -->
                 <div v-show="edittingThread">
-                    <edit-thread-component v-on:edit="editThread" v-on:back="backOutEdittingThread" v-bind:thread="newThread"></edit-thread-component>
+                    <edit-thread-component v-on:edit="editThread" v-on:back="backOutEdittingThread" v-bind:thread="newThread"v-bind:new_reply="newReply" v-bind:me="me" v-bind:failed="failedEditting" v-bind:error="error"></edit-thread-component>
+                </div>
+
+                <!-- Editting Reply -->
+                <div v-show="edittingReply">
+                    <edit-reply-component v-on:edit_reply="postEdittedReply" v-on:back="backOutEdittingReply" v-bind:reply="replyToEdit" v-bind:new_reply="newReply" v-bind:me="me" v-bind:failed="failedEditting" v-bind:error="error"></edit-reply-component>
                 </div>
 
                 <!-- Viewing threads -->
                 <div v-show="viewingThread">
-                    <thread-component v-on:remove="removeThread" v-on:edit="selectThreadToEdit" v-on:post="postEdittedReply" v-on:edit="editReply" v-on:back_thread="backOutThread"
-                        v-on:back_reply="backOutEdittingReply" v-on:delete="deleteReply" v-on:reply="replyToThread"
-                        v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView"
-                        v-bind:editted_reply="replyToEdit" v-bind:editting="edittingReply" v-bind:new_reply="newReply"
-                        v-bind:me="me">
+                    <thread-component v-on:remove="removeThread" v-on:toggle_edit_thread="selectThreadToEdit" v-on:back_thread="backOutThread"
+                        v-on:delete="deleteReply" v-on:reply="replyToThread" v-on:toggle_edit_reply="editReply"
+                        v-on:back="backOutThread()" v-bind:replies="replies" v-bind:thread="threadToView" v-bind:editting_thread="edittingThread" v-bind:editting_reply="edittingReply" v-bind:me="me">
                     </thread-component>
                 </div>
             </div>

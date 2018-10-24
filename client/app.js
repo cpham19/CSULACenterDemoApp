@@ -24,7 +24,7 @@ const headerComponent = {
 
 const homeComponent = {
     template:  `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <h1 class="display-4">User Information</h1>
 
                         <h2 class="display-4">Full Name</h2>
@@ -70,7 +70,7 @@ const searchedCoursesComponent = {
                     <ul v-for="course in courses">
                         <li>
                             <div class="jumbotron jumbotron-fluid">
-                                <div class="container">
+                                <div class="container-fluid">
                                     <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
 
                                     <h2 class="display-4">Name</h2>
@@ -96,7 +96,7 @@ const searchedCoursesComponent = {
 
 const addCourseComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <select class="browser-default" v-model="dept">
                             <option disabled value="">course dept</option>
                             <option>CS</option>
@@ -117,9 +117,10 @@ const addCourseComponent = {
                         <input v-model="room" placeholder="course room" type="text">
                         <button v-on:click="$emit('add', dept, name, number, section, description, unit, prof, room)" class="btn-small waves-effect waves-light" type="submit">Add</button>
                         <button v-on:click="$emit('discard')" class="btn-small waves-effect waves-light" type="submit">Discard</button>
+                        <div v-show="failed">{{error}}</div>
                     </div>
                 </div>`,
-    props: ['dept', 'name', 'number', 'section', 'description', 'unit', 'prof', 'room']
+    props: ['dept', 'name', 'number', 'section', 'description', 'unit', 'prof', 'room', 'failed', 'error']
 }
 
 
@@ -128,7 +129,7 @@ const removeCourseComponent = {
                     <ul v-for="course in courses">
                         <li>
                             <div class="jumbotron jumbotron-fluid">
-                                <div class="container">
+                                <div class="container-fluid">
                                     <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
 
                                     <h2 class="display-4">Name</h2>
@@ -158,7 +159,7 @@ const dropCourseComponent = {
                         <template v-for="course in courses">
                             <li v-show="courseId === course._id">
                                 <div class="jumbotron jumbotron-fluid">
-                                    <div class="container">
+                                    <div class="container-fluid">
                                         <h1 class="display-4">{{course.dept}} {{course.number}}-{{course.section}}</h1>
 
                                         <h2 class="display-4">Name</h2>
@@ -185,7 +186,7 @@ const dropCourseComponent = {
 
 const editCourseComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <select class="browser-default" v-model="course">
                             <option disabled value="">Choose your course to edit</option>
                             <option v-for="courseObj in courses" v-bind:value="courseObj">{{courseObj.dept}}{{courseObj.number}}-{{courseObj.section}}-{{courseObj.name}}</option>
@@ -210,10 +211,11 @@ const editCourseComponent = {
                             <input v-model="course.room" placeholder="course room" type="text">
                             <button v-on:click="$emit('edit', course)" class="btn-small waves-effect waves-light" type="submit">Edit</button>
                             <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                            <div v-show="failed">{{error}}</div>
                         </div>
                     </div>
                 </div>`,
-    props: ['course', 'courses']
+    props: ['course', 'courses', 'failed', 'error']
 }
 
 
@@ -240,7 +242,7 @@ const assignmentComponent = {
                     <div v-show="me.admin">
                         <template v-for="course in courses">
                             <div class="jumbotron jumbotron-fluid">
-                                <div class="container">
+                                <div class="container-fluid">
                                     <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-show="course.prof === me.name" v-on:click="$emit('add', course)"
                                             class="btn-small waves-effect waves-light" type="submit">+</button></h1>
                                     <table>
@@ -275,7 +277,7 @@ const assignmentComponent = {
                         <template v-for="courseId in me.courses">
                             <template v-for="course in courses">
                                 <div class="jumbotron jumbotron-fluid" v-show="courseId === course._id">
-                                    <div class="container">
+                                    <div class="container-fluid">
                                         <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-show="course.prof === me.name" v-on:click="$emit('add', course)"
                                                 class="btn-small waves-effect waves-light" type="submit">+</button></h1>
                                         <table>
@@ -313,7 +315,7 @@ const assignmentComponent = {
 
 const addAssignmentComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <h1 class="display-4">Adding assignment to
                             {{course.dept}}{{course.number}}-{{course.section}}
                             {{course.name}}
@@ -323,26 +325,28 @@ const addAssignmentComponent = {
                         <textarea v-model="description" placeholder="description of assignment"></textarea>
                         <button v-on:click="$emit('post', course._id, date, title, description)"
                             class="btn-small waves-effect waves-light" type="submit">Post</button>
+                        <div v-show="failed">{{error}}</div>
                     </div>
                 </div>`,
-    props: ['course', 'date', 'title', 'description']
+    props: ['course', 'date', 'title', 'description', 'failed', 'error']
 }
 
 const editAssignmentComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <input v-model="assignment.title" placeholder="title of assignment" type="text">
                         <textarea v-model="assignment.description" placeholder="description of assignment"></textarea>
                         <button v-on:click="$emit('edit', assignment)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
                         <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        <div v-show="failed">{{error}}</div>
                     </div>
                 </div>`,
-    props: ['assignment',]
+    props: ['assignment', 'failed', 'error']
 }
 
 const viewAssignmentComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <button v-on:click="$emit('back')" type="submit">Back</button>
                         <h1 class="display-4">{{assignment.title}}</h1>
                         <p class="lead">Due Date: {{assignment.dueDate}}</p>
@@ -356,7 +360,7 @@ const forumComponent = {
     template: `<div>
                     <template v-for="course in courses">
                         <div class="jumbotron jumbotron-fluid">
-                            <div class="container">
+                            <div class="container-fluid">
                                 <h1 class="display-4">{{course.dept}}{{course.number}}-{{course.section}} {{course.name}} <button v-on:click="$emit('create', course)"
                                         class="btn-small waves-effect waves-light" type="submit">+</button></h1>
                                 <table>
@@ -382,44 +386,52 @@ const forumComponent = {
 
 const addThreadComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <h1 class="display-4">Adding thread to
                             {{course.dept}}{{course.number}}-{{course.section}} {{course.name}}
                         </h1>
                         <input v-model="title" placeholder="title of thread" type="text">
                         <textarea v-model="description" placeholder="description of thread"></textarea>
                         <button v-on:click="$emit('post', course._id, me, title, description)" class="btn-small waves-effect waves-light" type="submit">Post</button>
+                        <div v-show="failed">{{error}}</div>
                     </div>
                 </div>`,
-    props: ['course', 'title', 'description', 'me']
+    props: ['course', 'title', 'description', 'me', 'failed', 'error']
 }
 
 const editThreadComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <input v-model="thread.title" placeholder="title of thread" type="text">
                         <textarea v-model="thread.description" placeholder="description of thread"></textarea>
                         <button v-on:click="$emit('edit', thread)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
                         <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        <div v-show="failed">{{error}}</div>
                     </div>
                 </div>`,
-    props: ['thread']
+    props: ['thread', 'failed', 'error']
+}
+
+const editReplyComponent ={
+    template: `<div class="jumbotron jumbotron-fluid">
+                    <div class="container-fluid-fluid">
+                        <textarea v-model="reply.description" placeholder="description of reply"></textarea>
+                        <button v-on:click="$emit('edit_reply', reply)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
+                        <button v-on:click="$emit('back')" class="btn-small waves-effect waves-light" type="submit">Back</button>
+                        <div v-show="failed">{{error}}</div>
+                    </div>
+                </div>`,
+    props: ['reply', 'failed', 'error']
 }
 
 const threadComponent = {
     template: `<div class="jumbotron jumbotron-fluid">
-                    <div class="container">
+                    <div class="container-fluid">
                         <button v-on:click="$emit('back_thread')" type="submit">Back</button>
                         <br />
                         <br />
 
-                        <div v-show="editting">
-                            <textarea v-model="editted_reply.description" placeholder="description of reply"></textarea>
-                            <button v-on:click="$emit('post', editted_reply)" class="btn-small waves-effect waves-light" type="submit">Submit</button>
-                            <button v-on:click="$emit('back_reply')" class="btn-small waves-effect waves-light" type="submit">Back</button>
-                        </div>
-
-                        <div v-show="!editting">
+                        <div>
                             <h1 class="display-4">{{thread.title}}</h1>
                             <br />
                             <table>
@@ -438,8 +450,8 @@ const threadComponent = {
                                             {{thread.date}}<br/>
                                             <img :src="thread.authorAvatar" width="60px" height="60px"><br/>
                                             {{thread.authorName}}<br/>
-                                            <button v-show="thread.authorName === me.name || me.admin" v-on:click="$emit('edit', thread)" type="submit">Edit</button><br/>
-                                            <button v-show="thread.authorName === me.name || me.admin" v-on:click="$emit('remove', thread)" type="submit">Remove</button>
+                                            <button v-show="(thread.authorName === me.name || me.admin) && !editting_thread" v-on:click="$emit('toggle_edit_thread', thread)" type="submit">Edit</button><br/>
+                                            <button v-show="(thread.authorName === me.name || me.admin) && !editting_thread"" v-on:click="$emit('remove', thread)" type="submit">Remove</button>
                                         </td>
                                     </tr>
 
@@ -450,10 +462,10 @@ const threadComponent = {
                                             {{reply.date}}<br/>
                                             <img :src="reply.authorAvatar" width="60px" height="60px"><br/>
                                             {{reply.authorName}}<br />
-                                            <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('edit', reply)" type="submit"
-                                                v-show="!editting">Edit</button><br/>
+                                            <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('toggle_edit_reply', reply)" type="submit"
+                                                v-show="!editting_reply">Edit</button><br/>
                                             <button v-show="reply.authorName === me.name || me.admin" v-on:click="$emit('delete', reply)" type="submit"
-                                                v-show="!editting">Delete</button>
+                                                v-show="!editting_reply">Delete</button>
                                         </td>
                                     </tr>
                                 </tbody>
@@ -464,10 +476,11 @@ const threadComponent = {
                             <!-- For creating a new reply to a thread -->
                             <textarea v-model="new_reply" placeholder="description of reply"></textarea>
                             <button v-on:click="$emit('reply', thread, me, new_reply)">Reply</button>
+                            <div v-show="failed">{{error}}</div>
                         </div>
                     </div>
                 </div>`,
-    props: ['replies', 'thread', 'editting', 'editted_reply', 'new_reply', 'me']
+    props: ['replies', 'thread', 'editting_thread', 'editting_reply', 'new_reply', 'me', 'failed', 'error']
 }
 
 const app = new Vue({
@@ -533,13 +546,16 @@ const app = new Vue({
         threadToView: {},
         newReply: '',
         edittingReply: false,
-        replyToEdit: {}
+        replyToEdit: {},
+        failedAdding: false,
+        failedEditting: false,
+        error: "No Empty spaces!",
     },
     methods: {
         handler: function handler(event) { },
         joinUser: function () {
             // Reject if user doesn't put name or password
-            if (!this.userName || !this.password) {
+            if (!this.userName.replace( /\s/g, '') || !this.password.replace( /\s/g, '')) {
                 return
             }
 
@@ -565,9 +581,12 @@ const app = new Vue({
         },
         signupUser: function () {
             // Reject if user doesn't put name or password
-            if (!this.firstName || !this.lastName || !this.streetAddress || !this.city || !this.stateLocation || !this.zipCode || !this.email || !this.phoneNumber || !this.userName || !this.password) {
+            if (!this.firstName.replace( /\s/g, '') || !this.lastName.replace( /\s/g, '') || !this.streetAddress.replace( /\s/g, '') || !this.city.replace( /\s/g, '') || !this.stateLocation.replace( /\s/g, '') || !this.zipCode.replace( /\s/g, '') || !this.email.replace( /\s/g, '') || !this.phoneNumber.replace( /\s/g, '') || !this.userName.replace( /\s/g, '') || !this.password.replace( /\s/g, '')) {
+                this.failedAdding = true
                 return
             }
+
+            this.failedAdding = false
 
             socket.emit('create-user', this.firstName, this.lastName, this.streetAddress, this.city, this.zipCode, this.stateLocation, this.email, this.phoneNumber, this.userName, this.password, this.admin)
         },
@@ -616,9 +635,12 @@ const app = new Vue({
             }
         },
         addCourse: function (dept, name, number, section, description, unit, prof, room) {
-            if (!dept || !name || !number || !section || !description || !unit || !prof || !room) {
+            if (!dept.replace( /\s/g, '') || !name.replace( /\s/g, '') || !number.replace( /\s/g, '') || !section.replace( /\s/g, '') || !description.replace( /\s/g, '') || !unit.replace( /\s/g, '') || !prof.replace( /\s/g, '') || !room.replace( /\s/g, '')) {
+                this.failedAdding = true
                 return
             }
+
+            this.failedAdding = false
 
             const course = { dept: dept, name: name, number: number, section: section, description: description, unit: unit, prof: prof, room: room }
 
@@ -626,7 +648,7 @@ const app = new Vue({
         },
         searchCourse: function (dept, number) {
             // If courseDept is empty, do nothing
-            if (!dept || (!dept && !number)) {
+            if (!dept.replace( /\s/g, '') || (!dept.replace( /\s/g, '') && !number.replace( /\s/g, ''))) {
                 return
             }
 
@@ -671,9 +693,12 @@ const app = new Vue({
             socket.emit('remove-course', courseId)
         },
         editCourse: function (newCourse) {
-            if (!newCourse.dept || !newCourse.name || !newCourse.section || !newCourse.description || !newCourse.unit || !newCourse.prof || !newCourse.room) {
+            if (!newCourse.dept.replace( /\s/g, '') || !newCourse.name.replace( /\s/g, '') || !newCourse.section.replace( /\s/g, '') || !newCourse.description.replace( /\s/g, '') || !newCourse.unit.replace( /\s/g, '') || !newCourse.prof.replace( /\s/g, '') || !newCourse.room.replace( /\s/g, '')) {
+                this.failedEditting = true
                 return
             }
+
+            this.failedEditting = false
 
             socket.emit('edit-course', newCourse)
         },
@@ -683,12 +708,15 @@ const app = new Vue({
         addAssignment: function (course) {
             this.addingAssignment = true
             this.edittingAssignment = false
-            this.courseOfAssignmentToAdd = course
+            this.courseOfAssignmentToAdd = JSON.parse(JSON.stringify(course))
         },
         postAssignment: function (courseId, date, assignmentTitle, assignmentDescription) {
-            if (!date || !assignmentTitle || !assignmentDescription) {
+            if (!date.replace( /\s/g, '') || !assignmentTitle.replace( /\s/g, '') || !assignmentDescription.replace( /\s/g, '')) {
+                this.failedAdding = true
                 return
             }
+
+            this.failedAdding = false
 
             const year = date.substring(0, 4)
             const month = date.substring(5,7)
@@ -705,12 +733,15 @@ const app = new Vue({
         selectAssignmentToEdit: function (assignment) {
             this.addingAssignment = false
             this.edittingAssignment = true
-            this.newAssignment = assignment
+            this.newAssignment = JSON.parse(JSON.stringify(assignment))
         },
         editAssignment: function (assignment) {
-            if (!assignment.title || !assignment.description) {
+            if (!assignment.title.replace( /\s/g, '') || !assignment.description.replace( /\s/g, '')) {
+                this.failedEditting = true
                 return
             }
+
+            this.failedEditting = false
 
             socket.emit('edit-assignment', assignment)
         },
@@ -719,13 +750,16 @@ const app = new Vue({
         },
         createThread: function (course) {
             this.addingThread = true
-            this.edittingThreadt = false
+            this.edittingThread = false
             this.courseOfThreadToAdd = course
         },
         postThread: function (courseId, author, threadTitle, threadDescription) {
-            if (!threadTitle || !threadDescription) {
+            if (!threadTitle.replace( /\s/g, '') || !threadDescription.replace( /\s/g, '')) {
+                this.failedAdding = true
                 return
             }
+
+            this.failedAdding = false
 
             const modifiedAuthor = { name: author.name, avatar: author.avatar }
 
@@ -738,12 +772,17 @@ const app = new Vue({
         selectThreadToEdit: function (thread) {
             this.addingThread = false
             this.edittingThread = true
-            this.newThread = thread
+            this.newThread = JSON.parse(JSON.stringify(thread))
         },
         editThread: function (thread) {
-            if (!thread.title || !thread.description) {
+            if (!thread.title.replace( /\s/g, '') || !thread.description.replace( /\s/g, '')) {
+                this.failedEditting = true
                 return
             }
+
+            this.failedEditting = false
+
+            this.threadToView = JSON.parse(JSON.stringify(thread))
 
             socket.emit('edit-thread', thread)
         },
@@ -752,7 +791,7 @@ const app = new Vue({
         },
         viewAssignment: function (assignment) {
             this.viewingAssignment = true
-            this.assignmentToView = assignment
+            this.assignmentToView = JSON.parse(JSON.stringify(assignment))
         },
         backOutAssignment: function () {
             this.viewingAssignment = false
@@ -760,16 +799,19 @@ const app = new Vue({
         },
         viewThread: function (thread) {
             this.viewingThread = true
-            this.threadToView = thread
+            this.threadToView = JSON.parse(JSON.stringify(thread))
         },
         backOutThread: function () {
             this.viewingThread = false
             this.threadToView = {}
         },
         replyToThread: function (threadId, author, newReply) {
-            if (!newReply) {
+            if (!newReply || !newReply.replace( /\s/g, '')) {
+                this.failedAdding = true
                 return
             }
+
+            this.failedEditting = false
 
             const modifiedAuthor = { name: author.name, avatar: author.avatar }
 
@@ -778,12 +820,19 @@ const app = new Vue({
         },
         editReply: function (reply) {
             this.edittingReply = true
-            this.replyToEdit = reply
+            this.replyToEdit = JSON.parse(JSON.stringify(reply))
         },
         backOutEdittingReply: function () {
             this.edittingReply = false
         },
         postEdittedReply: function (reply) {
+            if (!reply.description.replace( /\s/g, '')) {
+                this.failedEditting = true
+                return
+            }
+
+            this.failedEditting = false
+
             socket.emit('edit-reply', reply)
         },
         deleteReply: function (reply) {
@@ -807,6 +856,7 @@ const app = new Vue({
         'forum-component': forumComponent,
         'add-thread-component': addThreadComponent,
         'edit-thread-component': editThreadComponent,
+        'edit-reply-component': editReplyComponent,
         'thread-component': threadComponent,
     }
 })

@@ -251,3 +251,7 @@ hr {
 .display-4 {
     text-decoration: underline;
 }
+
+.failed {
+    color: red;
+}
